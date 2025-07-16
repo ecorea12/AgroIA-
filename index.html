@@ -41,13 +41,17 @@
 <body class="bg-gray-100">
 
     <div class="container mx-auto p-4 sm:p-6 max-w-7xl">
-        <header class="text-center mb-8">
+        <header class="text-center mb-8 relative">
             <div class="flex justify-center items-center gap-3">
                 <i class="ph-plant-fill text-5xl text-green-600"></i>
                 <h1 class="text-4xl font-bold text-gray-800">AgroIA</h1>
                 <div id="status-indicator" title="Estado de la conexión"></div>
             </div>
-            <p class="text-gray-600 mt-2">Tu compañero IA para una agricultura sostenible.</p>
+            <p class="text-gray-600 mt-2" data-translate="appSubtitle">Tu compañero IA para una agricultura sostenible.</p>
+            <!-- BOTÓN DE IDIOMA CON BANDERA -->
+            <button id="lang-switcher" class="absolute top-0 right-0 bg-white border border-gray-300 rounded-full p-1.5 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                <img id="lang-flag" src="" alt="Cambiar idioma" class="w-6 h-6 rounded-full object-cover">
+            </button>
         </header>
 
         <main class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -58,20 +62,20 @@
                 <div class="card">
                     <h2 class="text-xl font-bold text-gray-700 mb-4 flex items-center gap-2">
                         <i class="ph-rocket-launch text-indigo-500"></i>
-                        Herramientas Principales
+                        <span data-translate="toolsTitle">Herramientas Principales</span>
                     </h2>
                     <div class="grid grid-cols-2 gap-2">
                         <button id="nav-diagnosis" class="nav-button p-3 rounded-lg font-semibold flex items-center justify-center gap-2 text-sm">
-                            <i class="ph-chat-circle-dots"></i> Chat
+                            <i class="ph-chat-circle-dots"></i> <span data-translate="navDiagnosis">Chat</span>
                         </button>
                         <button id="nav-calendar" class="nav-button p-3 rounded-lg font-semibold flex items-center justify-center gap-2 text-sm">
-                            <i class="ph-calendar"></i> Calendario
+                            <i class="ph-calendar"></i> <span data-translate="navCalendar">Calendario</span>
                         </button>
                         <button id="nav-library" class="nav-button p-3 rounded-lg font-semibold flex items-center justify-center gap-2 text-sm">
-                            <i class="ph-books"></i> Biblioteca
+                            <i class="ph-books"></i> <span data-translate="navLibrary">Biblioteca</span>
                         </button>
                         <button id="nav-irrigation" class="nav-button p-3 rounded-lg font-semibold flex items-center justify-center gap-2 text-sm">
-                            <i class="ph-drop"></i> Riego
+                            <i class="ph-drop"></i> <span data-translate="navIrrigation">Riego</span>
                         </button>
                     </div>
                 </div>
@@ -82,20 +86,20 @@
                         <div>
                             <h2 class="text-xl font-bold text-gray-700 mb-4 flex items-center gap-2">
                                 <i class="ph-camera-plus text-green-500"></i>
-                                Diagnosticar Cultivo
+                                <span data-translate="diagnoseTitle">Diagnosticar Cultivo</span>
                             </h2>
                             <label for="file-upload" class="custom-file-upload">
                                 <i class="ph-upload-simple text-3xl text-gray-400 mb-2"></i>
-                                <span class="text-green-600 font-semibold">Seleccionar imagen</span>
+                                <span class="text-green-600 font-semibold" data-translate="diagnoseButton">Seleccionar imagen</span>
                             </label>
                             <input id="file-upload" type="file" accept="image/*"/>
                         </div>
                         <div>
                             <h2 class="text-xl font-bold text-gray-700 mb-4 flex items-center gap-2">
                                 <i class="ph-test-tube text-orange-500"></i>
-                                Análisis de Suelo
+                                <span data-translate="soilTitle">Análisis de Suelo</span>
                             </h2>
-                            <label for="ph-slider" class="block mb-2 text-sm font-medium text-gray-600">pH del Suelo: <span id="ph-value" class="font-bold text-gray-800">7.0</span></label>
+                            <label for="ph-slider" class="block mb-2 text-sm font-medium text-gray-600"><span data-translate="soilLabel">pH del Suelo:</span> <span id="ph-value" class="font-bold text-gray-800">7.0</span></label>
                             <input id="ph-slider" type="range" min="4.0" max="9.0" value="7.0" step="0.1">
                         </div>
                     </div>
@@ -104,7 +108,7 @@
                 <div class="card">
                     <h2 class="text-xl font-bold text-gray-700 mb-4 flex items-center gap-2">
                         <i class="ph-thermometer-simple text-red-500"></i>
-                        Clima en <span id="location-name">...</span>
+                        <span data-translate="weatherTitle">Clima en</span> <span id="location-name">...</span>
                     </h2>
                     <div id="weather-info" class="text-gray-600 flex justify-center items-center h-20">
                         <div class="loader"></div>
@@ -118,13 +122,13 @@
                 <div id="view-diagnosis">
                     <h2 class="text-2xl font-bold text-gray-700 mb-4 flex items-center gap-2">
                         <i class="ph-lightbulb-filament text-blue-500"></i>
-                        Asistente Interactivo
+                        <span data-translate="chatTitle">Asistente Interactivo</span>
                     </h2>
                     <div id="chat-container" class="h-[60vh] flex flex-col">
                         <div id="chat-messages" class="flex-1 space-y-4 overflow-y-auto p-4 flex flex-col"></div>
                         <form id="chat-form" class="mt-4 border-t pt-4 hidden">
                             <div class="flex gap-2">
-                                <input id="chat-input" type="text" class="flex-1 border-gray-300 rounded-lg p-2 focus:ring-green-500 focus:border-green-500" placeholder="Escribe tu pregunta..." autocomplete="off">
+                                <input id="chat-input" type="text" class="flex-1 border-gray-300 rounded-lg p-2 focus:ring-green-500 focus:border-green-500" data-translate-placeholder="chatPlaceholder" placeholder="Escribe tu pregunta..." autocomplete="off">
                                 <button type="submit" class="bg-green-600 text-white p-2 rounded-lg hover:bg-green-700 disabled:bg-gray-400">
                                     <i class="ph-paper-plane-tilt-fill text-2xl"></i>
                                 </button>
@@ -137,17 +141,17 @@
                 <div id="view-calendar" class="hidden">
                      <h2 class="text-2xl font-bold text-gray-700 mb-4 flex items-center gap-2">
                         <i class="ph-calendar-check text-teal-500"></i>
-                        Calendario de Cultivo Inteligente
+                        <span data-translate="calendarTitle">Calendario de Cultivo Inteligente</span>
                     </h2>
                     <div class="space-y-4">
                         <div>
-                            <label for="crop-select-calendar" class="block text-sm font-medium text-gray-700">Selecciona un cultivo:</label>
+                            <label for="crop-select-calendar" class="block text-sm font-medium text-gray-700" data-translate="selectCrop">Selecciona un cultivo:</label>
                             <select id="crop-select-calendar" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
                                 <option>Maíz</option><option>Frijol</option><option>Tomate</option><option>Café</option><option>Plátano</option><option>Papa</option><option>Chile</option>
                             </select>
                         </div>
                         <button id="generate-calendar-btn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-lg flex items-center justify-center gap-2 transition-colors">
-                            <i class="ph-magic-wand"></i> Generar Calendario
+                            <i class="ph-magic-wand"></i> <span data-translate="generateCalendar">Generar Calendario</span>
                         </button>
                         <div id="calendar-results-container" class="prose max-w-none mt-4 h-[50vh] overflow-y-auto"></div>
                     </div>
@@ -157,11 +161,11 @@
                 <div id="view-library" class="hidden">
                     <h2 class="text-2xl font-bold text-gray-700 mb-4 flex items-center gap-2">
                         <i class="ph-books text-amber-500"></i>
-                        Biblioteca de Plagas y Enfermedades
+                        <span data-translate="libraryTitle">Biblioteca de Plagas y Enfermedades</span>
                     </h2>
                     <div class="space-y-4">
                         <div class="flex gap-2">
-                            <input id="library-search-input" type="text" class="flex-1 border-gray-300 rounded-lg p-2 focus:ring-amber-500 focus:border-amber-500" placeholder="Ej: Roya, Mosca blanca, Pulgón..." autocomplete="off">
+                            <input id="library-search-input" type="text" class="flex-1 border-gray-300 rounded-lg p-2 focus:ring-amber-500 focus:border-amber-500" data-translate-placeholder="libraryPlaceholder" placeholder="Ej: Roya, Mosca blanca, Pulgón..." autocomplete="off">
                             <button id="library-search-btn" class="bg-amber-500 text-white p-2 rounded-lg hover:bg-amber-600">
                                 <i class="ph-magnifying-glass-bold text-2xl"></i>
                             </button>
@@ -174,17 +178,17 @@
                 <div id="view-irrigation" class="hidden">
                     <h2 class="text-2xl font-bold text-gray-700 mb-4 flex items-center gap-2">
                         <i class="ph-drop-half-filled text-cyan-500"></i>
-                        Calculadora de Riego Inteligente
+                        <span data-translate="irrigationTitle">Calculadora de Riego Inteligente</span>
                     </h2>
                     <div class="space-y-4">
                         <div>
-                            <label for="crop-select-irrigation" class="block text-sm font-medium text-gray-700">Selecciona tu cultivo:</label>
+                            <label for="crop-select-irrigation" class="block text-sm font-medium text-gray-700" data-translate="selectCropIrrigation">Selecciona tu cultivo:</label>
                             <select id="crop-select-irrigation" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-cyan-500 focus:border-cyan-500 sm:text-sm rounded-md">
                                 <option>Maíz</option><option>Frijol</option><option>Tomate</option><option>Café</option><option>Plátano</option><option>Papa</option><option>Chile</option>
                             </select>
                         </div>
                         <button id="calculate-irrigation-btn" class="w-full bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-2 px-4 rounded-lg flex items-center justify-center gap-2 transition-colors">
-                            <i class="ph-calculator"></i> Calcular Riego
+                            <i class="ph-calculator"></i> <span data-translate="calculateIrrigation">Calcular Riego</span>
                         </button>
                         <div id="irrigation-results-container" class="prose max-w-none mt-4 h-[50vh] overflow-y-auto"></div>
                     </div>
@@ -201,6 +205,8 @@
         const locationName = document.getElementById('location-name');
         const phSlider = document.getElementById('ph-slider');
         const phValue = document.getElementById('ph-value');
+        const langSwitcher = document.getElementById('lang-switcher');
+        const langFlag = document.getElementById('lang-flag');
         
         const chatMessages = document.getElementById('chat-messages');
         const chatForm = document.getElementById('chat-form');
@@ -232,6 +238,112 @@
         let conversationHistory = [];
         let userLocation = { lat: 14.10, lon: -87.21, name: 'Tegucigalpa' };
         let weatherForecast = null;
+        let currentLanguage = 'es';
+
+        // --- LÓGICA DE TRADUCCIÓN ---
+        const translations = {
+            es: {
+                appSubtitle: "Tu compañero IA para una agricultura sostenible.",
+                toolsTitle: "Herramientas Principales",
+                navDiagnosis: "Chat",
+                navCalendar: "Calendario",
+                navLibrary: "Biblioteca",
+                navIrrigation: "Riego",
+                diagnoseTitle: "Diagnosticar Cultivo",
+                diagnoseButton: "Seleccionar imagen",
+                soilTitle: "Análisis de Suelo",
+                soilLabel: "pH del Suelo:",
+                weatherTitle: "Clima en",
+                chatTitle: "Asistente Interactivo",
+                chatPlaceholder: "Escribe tu pregunta...",
+                calendarTitle: "Calendario de Cultivo Inteligente",
+                selectCrop: "Selecciona un cultivo:",
+                generateCalendar: "Generar Calendario",
+                libraryTitle: "Biblioteca de Plagas y Enfermedades",
+                libraryPlaceholder: "Ej: Roya, Mosca blanca, Pulgón...",
+                irrigationTitle: "Calculadora de Riego Inteligente",
+                selectCropIrrigation: "Selecciona tu cultivo:",
+                calculateIrrigation: "Calcular Riego",
+                initialChatMessage: "Sube una foto para iniciar un diagnóstico.",
+                tipOfTheDay: "Consejo del Día:",
+                loading: "Cargando...",
+                onlineStatus: "Conectado",
+                offlineStatus: "Sin conexión (Modo Offline)",
+                initialCalendarMessage: "Selecciona un cultivo y genera un plan de acción para todo el ciclo.",
+                initialLibraryMessage: "Busca una plaga o enfermedad para ver su ficha técnica.",
+                initialIrrigationMessage: "Selecciona tu cultivo para obtener una recomendación de riego basada en el pronóstico del tiempo."
+            },
+            en: {
+                appSubtitle: "Your AI companion for sustainable agriculture.",
+                toolsTitle: "Main Tools",
+                navDiagnosis: "Chat",
+                navCalendar: "Calendar",
+                navLibrary: "Library",
+                navIrrigation: "Irrigation",
+                diagnoseTitle: "Diagnose Crop",
+                diagnoseButton: "Select image",
+                soilTitle: "Soil Analysis",
+                soilLabel: "Soil pH:",
+                weatherTitle: "Weather in",
+                chatTitle: "Interactive Assistant",
+                chatPlaceholder: "Type your question...",
+                calendarTitle: "Smart Crop Calendar",
+                selectCrop: "Select a crop:",
+                generateCalendar: "Generate Calendar",
+                libraryTitle: "Pest & Disease Library",
+                libraryPlaceholder: "E.g., Rust, Whitefly, Aphid...",
+                irrigationTitle: "Smart Irrigation Calculator",
+                selectCropIrrigation: "Select your crop:",
+                calculateIrrigation: "Calculate Irrigation",
+                initialChatMessage: "Upload a photo to start a diagnosis.",
+                tipOfTheDay: "Tip of the Day:",
+                loading: "Loading...",
+                onlineStatus: "Online",
+                offlineStatus: "Offline Mode",
+                initialCalendarMessage: "Select a crop and generate an action plan for the entire cycle.",
+                initialLibraryMessage: "Search for a pest or disease to see its technical sheet.",
+                initialIrrigationMessage: "Select your crop to get an irrigation recommendation based on the weather forecast."
+            }
+        };
+
+        function setLanguage(lang) {
+            currentLanguage = lang;
+            localStorage.setItem('agroia-lang', lang);
+            document.documentElement.lang = lang;
+            
+            if (lang === 'es') {
+                langFlag.src = 'https://flagcdn.com/us.svg';
+                langFlag.alt = 'Switch to English';
+                langSwitcher.title = 'Switch to English';
+            } else {
+                langFlag.src = 'https://flagcdn.com/es.svg';
+                langFlag.alt = 'Cambiar a Español';
+                langSwitcher.title = 'Cambiar a Español';
+            }
+
+            document.querySelectorAll('[data-translate]').forEach(el => {
+                const key = el.dataset.translate;
+                if (translations[lang][key]) {
+                    el.textContent = translations[lang][key];
+                }
+            });
+            document.querySelectorAll('[data-translate-placeholder]').forEach(el => {
+                const key = el.dataset.translatePlaceholder;
+                if (translations[lang][key]) {
+                    el.placeholder = translations[lang][key];
+                }
+            });
+            // Reset initial messages
+            initializeChat();
+            calendarResultsContainer.innerHTML = `<p class="text-gray-500 text-center mt-8">${translations[lang].initialCalendarMessage}</p>`;
+            libraryResultsContainer.innerHTML = `<p class="text-gray-500 text-center mt-8">${translations[lang].initialLibraryMessage}</p>`;
+            irrigationResultsContainer.innerHTML = `<p class="text-gray-500 text-center mt-8">${translations[lang].initialIrrigationMessage}</p>`;
+        }
+
+        langSwitcher.addEventListener('click', () => {
+            const newLang = currentLanguage === 'es' ? 'en' : 'es';
+            setLanguage(newLang);
+        });
 
         // --- FUNCIONES DE NAVEGACIÓN ---
         function switchView(view) {
@@ -256,7 +368,7 @@
 
             if (!navigator.onLine && cacheKey) {
                 const cache = await caches.open(DYNAMIC_CACHE_NAME);
-                const cacheKeyUrl = `${PROXY_URL}?key=${cacheKey}`;
+                const cacheKeyUrl = `${PROXY_URL}?key=${cacheKey}&lang=${currentLanguage}`;
                 const cachedResponse = await cache.match(cacheKeyUrl);
                 if (cachedResponse) {
                     console.log("Sirviendo desde caché:", cacheKeyUrl);
@@ -265,7 +377,7 @@
                         return data.candidates[0].content.parts[0].text;
                     }
                 }
-                return "Estás sin conexión. No se encontró una respuesta guardada para esta solicitud.";
+                return currentLanguage === 'es' ? "Estás sin conexión. No se encontró una respuesta guardada." : "You are offline. No saved response was found.";
             }
             
             try {
@@ -276,12 +388,12 @@
                 });
                 if (!response.ok) {
                     console.error("Error desde el proxy:", await response.json());
-                    return "Error: No se pudo comunicar con la IA a través del servidor.";
+                    return currentLanguage === 'es' ? "Error: No se pudo comunicar con la IA." : "Error: Could not communicate with the AI.";
                 }
                 
                 if (cacheKey) {
                     const cache = await caches.open(DYNAMIC_CACHE_NAME);
-                    const cacheKeyUrl = `${PROXY_URL}?key=${cacheKey}`;
+                    const cacheKeyUrl = `${PROXY_URL}?key=${cacheKey}&lang=${currentLanguage}`;
                     await cache.put(cacheKeyUrl, response.clone());
                     console.log("Respuesta guardada en caché:", cacheKeyUrl);
                 }
@@ -290,10 +402,10 @@
                 if (result.candidates && result.candidates[0].content && result.candidates[0].content.parts[0]) {
                     return result.candidates[0].content.parts[0].text;
                 }
-                return "No se recibió una respuesta válida de la IA.";
+                return currentLanguage === 'es' ? "No se recibió una respuesta válida de la IA." : "Did not receive a valid response from the AI.";
             } catch (e) {
                 console.error("Error de red al llamar al proxy:", e);
-                return "Error de red: No se pudo conectar con el servidor.";
+                return currentLanguage === 'es' ? "Error de red: No se pudo conectar al servidor." : "Network Error: Could not connect to the server.";
             }
         }
 
@@ -316,12 +428,13 @@
 
         // --- LÓGICA DE DIAGNÓSTICO Y CHAT ---
         function initializeChat() {
+            const lang = currentLanguage;
             chatMessages.innerHTML = `
                 <div class="m-auto text-center">
-                    <p class="text-gray-500">Sube una foto para iniciar un diagnóstico.</p>
+                    <p class="text-gray-500" data-translate="initialChatMessage">${translations[lang].initialChatMessage}</p>
                     <div class="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg text-sm">
-                        <p class="font-semibold text-green-800">Consejo del Día:</p>
-                        <p class="text-green-700" id="tip-of-the-day-chat">Cargando...</p>
+                        <p class="font-semibold text-green-800" data-translate="tipOfTheDay">${translations[lang].tipOfTheDay}</p>
+                        <p class="text-green-700" id="tip-of-the-day-chat">${translations[lang].loading}</p>
                     </div>
                 </div>`;
             fetchTipOfTheDay();
@@ -341,7 +454,8 @@
             chatForm.classList.add('hidden');
             
             const currentPh = phSlider.value;
-            const initialPrompt = `Eres un asistente experto en agronomía y agricultura sostenible, especializado en regiones tropicales como Honduras. Analiza la siguiente imagen de una hoja de planta y el pH del suelo de ${currentPh}. Genera un reporte completo con secciones para: 1. Identificación, 2. Diagnóstico Visual, 3. Análisis del pH, 4. Plan de Acción Integrado (soluciones para diagnóstico y suelo), 5. Necesidades Generales. Responde en español. Al final, invita al usuario a hacer más preguntas.`;
+            const langInstruction = `Respond in ${currentLanguage === 'es' ? 'Spanish' : 'English'}.`;
+            const initialPrompt = `You are an expert agronomy assistant for tropical regions like Honduras. Analyze the following plant leaf image and the soil pH of ${currentPh}. Generate a complete report with sections for: 1. Identification, 2. Visual Diagnosis, 3. pH Analysis, 4. Integrated Action Plan (solutions for diagnosis and soil), 5. General Needs. ${langInstruction} At the end, invite the user to ask more questions.`;
             
             conversationHistory = [{ role: "user", parts: [{ text: initialPrompt }, { inlineData: { mimeType: "image/jpeg", data: base64ImageData.split(',')[1] } }] }];
             const payload = { contents: conversationHistory };
@@ -392,9 +506,10 @@
         generateCalendarBtn.addEventListener('click', async () => {
             const selectedCrop = cropSelectCalendar.value;
             const cacheKey = `calendar-${selectedCrop}`;
-            showLoader(calendarResultsContainer, `Generando calendario para ${selectedCrop}...`);
+            showLoader(calendarResultsContainer, translations[currentLanguage].loading);
 
-            const calendarPrompt = `Actúa como un agrónomo experto para Honduras. Crea un calendario de cultivo detallado y práctico para **${selectedCrop}**, considerando la ubicación del usuario en **${userLocation.name}**. El calendario debe estar en formato Markdown y cubrir fases clave (Preparación, Siembra, Cuidados, Control de Plagas, Cosecha) con fechas y acciones específicas. Usa un lenguaje claro para un pequeño agricultor.`;
+            const langInstruction = `The calendar must be written in ${currentLanguage === 'es' ? 'Spanish' : 'English'}.`;
+            const calendarPrompt = `Act as an expert agronomist for Honduras. Create a detailed and practical crop calendar for **${selectedCrop}**, considering the user's location in **${userLocation.name}**. The calendar must be in Markdown format and cover key phases (Land Preparation, Sowing, Care, Pest Control, Harvest) with recommended dates and specific actions. ${langInstruction}`;
             
             const payload = { contents: [{ role: "user", parts: [{ text: calendarPrompt }] }] };
             const calendarText = await callGemini(payload, cacheKey);
@@ -411,9 +526,10 @@
             const query = librarySearchInput.value.trim();
             if (!query) return;
             const cacheKey = `library-${query.toLowerCase().replace(/\s+/g, '-')}`;
-            showLoader(libraryResultsContainer, `Buscando información sobre "${query}"...`);
+            showLoader(libraryResultsContainer, translations[currentLanguage].loading);
 
-            const libraryPrompt = `Actúa como un fitopatólogo y entomólogo experto creando una ficha técnica para una enciclopedia agrícola. El término de búsqueda es "${query}". Proporciona la siguiente información en formato Markdown: ### Descripción General, ### Cultivos Afectados Comúnmente, ### Síntomas Clave para Identificación, ### Plan de Manejo y Control Orgánico.`;
+            const langInstruction = `The entire response must be in ${currentLanguage === 'es' ? 'Spanish' : 'English'}.`;
+            const libraryPrompt = `Act as an expert phytopathologist creating a technical sheet for an agricultural encyclopedia. The search term is "${query}". Provide the following information in Markdown format: ### General Description, ### Commonly Affected Crops, ### Key Symptoms for Identification, ### Organic Management and Control Plan. ${langInstruction}`;
 
             const payload = { contents: [{ role: "user", parts: [{ text: libraryPrompt }] }] };
             const libraryText = await callGemini(payload, cacheKey);
@@ -423,14 +539,15 @@
         // --- LÓGICA DE LA CALCULADORA DE RIEGO ---
         calculateIrrigationBtn.addEventListener('click', async () => {
             if (!weatherForecast) {
-                irrigationResultsContainer.innerHTML = '<p class="text-red-500 text-center">No se pudo obtener el pronóstico del tiempo. Inténtalo de nuevo.</p>';
+                irrigationResultsContainer.innerHTML = `<p class="text-red-500 text-center">${currentLanguage === 'es' ? 'No se pudo obtener el pronóstico.' : 'Could not get the forecast.'}</p>`;
                 return;
             }
             const selectedCrop = cropSelectIrrigation.value;
             const cacheKey = `irrigation-${selectedCrop}`;
-            showLoader(irrigationResultsContainer, `Calculando riego para ${selectedCrop}...`);
-
-            const irrigationPrompt = `Actúa como un experto en gestión de riego agrícola para Centroamérica. Mi cultivo es **${selectedCrop}** y estoy en **${userLocation.name}**. Este es el pronóstico del tiempo para los próximos 3 días: Hoy: Temp Máx ${weatherForecast.tempMax[0]}°C, Precipitación ${weatherForecast.precip[0]} mm. Mañana: Temp Máx ${weatherForecast.tempMax[1]}°C, Precipitación ${weatherForecast.precip[1]} mm. Pasado mañana: Temp Máx ${weatherForecast.tempMax[2]}°C, Precipitación ${weatherForecast.precip[2]} mm. Basado en esto, da una recomendación de riego clara y concisa para hoy, incluyendo: 1. Recomendación Principal (Sí/No regar), 2. Justificación, 3. Consejo Práctico.`;
+            showLoader(irrigationResultsContainer, translations[currentLanguage].loading);
+            
+            const langInstruction = `Provide the response in ${currentLanguage === 'es' ? 'Spanish' : 'English'}.`;
+            const irrigationPrompt = `Act as an expert in agricultural irrigation management for Central America. My crop is **${selectedCrop}** and I am in **${userLocation.name}**. This is the weather forecast for the next 3 days: Today: Max Temp ${weatherForecast.tempMax[0]}°C, Precipitation ${weatherForecast.precip[0]} mm. Tomorrow: Max Temp ${weatherForecast.tempMax[1]}°C, Precipitation ${weatherForecast.precip[1]} mm. Day after tomorrow: Max Temp ${weatherForecast.tempMax[2]}°C, Precipitation ${weatherForecast.precip[2]} mm. Based on this, give a clear and concise irrigation recommendation for today, including: 1. Main Recommendation (Yes/No to water), 2. Justification, 3. Practical Tip. ${langInstruction}`;
 
             const payload = { contents: [{ role: "user", parts: [{ text: irrigationPrompt }] }] };
             const irrigationText = await callGemini(payload, cacheKey);
@@ -483,7 +600,8 @@
             const tipContainer = document.getElementById('tip-of-the-day-chat');
             if (!tipContainer) return;
             const cacheKey = 'tip-of-the-day';
-            const prompt = "Dame un consejo corto, práctico y novedoso sobre agricultura sostenible para pequeños agricultores en Centroamérica.";
+            const langInstruction = `The tip must be in ${currentLanguage === 'es' ? 'Spanish' : 'English'}.`;
+            const prompt = `Give me a short, practical, and novel tip about sustainable agriculture for small farmers in Central America. ${langInstruction}`;
             
             const payload = { contents: [{ role: "user", parts: [{ text: prompt }] }] };
             const tip = await callGemini(payload, cacheKey);
@@ -494,7 +612,7 @@
             const isOnline = navigator.onLine;
             statusIndicator.classList.toggle('online', isOnline);
             statusIndicator.classList.toggle('offline', !isOnline);
-            statusIndicator.title = isOnline ? 'Conectado' : 'Sin conexión (Modo Offline)';
+            statusIndicator.title = isOnline ? translations[currentLanguage].onlineStatus : translations[currentLanguage].offlineStatus;
         }
 
         window.addEventListener('online', updateOnlineStatus);
@@ -508,14 +626,12 @@
                     .catch(err => console.error('Error al registrar Service Worker', err));
             }
 
+            const savedLang = localStorage.getItem('agroia-lang') || 'es';
+            setLanguage(savedLang);
+
             updateOnlineStatus();
             switchView('diagnosis');
             initializeWeather();
-            initializeChat();
-            
-            calendarResultsContainer.innerHTML = '<p class="text-gray-500 text-center mt-8">Selecciona un cultivo y genera un plan de acción para todo el ciclo.</p>';
-            libraryResultsContainer.innerHTML = '<p class="text-gray-500 text-center mt-8">Busca una plaga o enfermedad para ver su ficha técnica.</p>';
-            irrigationResultsContainer.innerHTML = '<p class="text-gray-500 text-center mt-8">Selecciona tu cultivo para obtener una recomendación de riego basada en el pronóstico del tiempo.</p>';
         };
     </script>
 </body>
