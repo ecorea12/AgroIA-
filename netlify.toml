@@ -1,3 +1,17 @@
+# Configuración principal de compilación
+[build]
+  # Directorio donde se publicará el sitio estático (tu index.html)
+  publish = "."
+  # Directorio donde se encuentran las funciones serverless
+  functions = "netlify/functions"
+
+# Configuración específica para las funciones
 [functions]
-  directory = "netlify/functions/"
+  # Le decimos a Netlify que empaquete las dependencias de las funciones
   node_bundler = "esbuild"
+
+# Configuración del entorno de Node.js
+[build.environment]
+  # ¡ESTA ES LA LÍNEA CLAVE!
+  # Forzamos a Netlify a usar la versión 18 de Node.js, que es estable.
+  NODE_VERSION = "18"
