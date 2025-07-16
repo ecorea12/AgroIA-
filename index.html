@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgroIA: Asistente de Agricultura Sostenible</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Iconos de Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
+        input[type="file"] { display: none; }
+        .custom-file-upload { border: 2px dashed #cbd5e1; display: inline-block; padding: 1rem; cursor: pointer; text-align: center; width: 100%; border-radius: 0.75rem; transition: background-color 0.3s, border-color 0.3s; }
+        .custom-file-upload:hover { background-color: #e9f5e9; border-color: #22c55e; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .loader { border: 4px solid rgba(0,0,0,0.1); border-left-color: #22c55e; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
+        .card { background-color: white; border-radius: 1rem; padding: 1.5rem; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1); }
+        .prose h3 { font-size: 1.25rem; font-weight: 600; margin-top: 1rem; margin-bottom: 0.5rem; }
+        .prose ul { list-style-position: inside; }
+        .prose li { margin-left: 1rem; list-style-type: disc; }
+        .prose strong { color: #166534; }
+        .history-item { cursor: pointer; transition: background-color 0.2s; }
+        .history-item:hover { background-color: #f9fafb; }
+        input[type=range] { -webkit-appearance: none; background: transparent; width: 100%;}
+        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 20px; width: 20px; border-radius: 50%; background: #22c55e; cursor: pointer; margin-top: -8px; }
+        input[type=range]::-moz-range-thumb { height: 20px; width: 20px; border-radius: 50%; background: #22c55e; cursor: pointer; }
+        input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 4px; cursor: pointer; background: #d1d5db; border-radius: 5px; }
+        input[type=range]::-moz-range-track { width: 100%; height: 4px; cursor: pointer; background: #d1d5db; border-radius: 5px; }
+        /* Estilos de Chat */
+        .chat-message { max-width: 85%; padding: 0.75rem 1rem; border-radius: 1rem; word-wrap: break-word; }
+        .chat-user { background-color: #22c55e; color: white; border-bottom-right-radius: 0.25rem; align-self: flex-end; }
+        .chat-assistant { background-color: #e5e7eb; color: #1f2937; border-bottom-left-radius: 0.25rem; align-self: flex-start; }
+        .nav-button { transition: all 0.2s; }
+        .nav-button.active { background-color: #10b981; color: white; }
+        .nav-button:not(.active) { background-color: #e5e7eb; color: #374151; }
+    </style>
+</head>
+<body class="bg-gray-100">
+
+    <div class="container mx-auto p-4 sm:p-6 max-w-7xl">
+        <header class="text-center mb-8">
+            <div class="flex justify-center items-center gap-3">
+                <i class="ph-plant-fill text-5xl text-green-600"></i>
+                <h1 class="text-4xl font-bold text-gray-800">AgroIA</h1>
+            </div>
+            <p class="text-gray-600 mt-2">Tu compañero IA para una agricultura sostenible.</p>
+        </header>
+
+        <main class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+            <!-- Columna Izquierda (Controles) -->
+            <div class="space-y-6 lg:col-span-1">
+                <!-- NAVEGACIÓN PRINCIPAL -->
+                <div class="card">
+                    <h2 class="text-xl font-bold text-gray-700 mb-4 flex items-center gap-2">
+                        <i class="ph-rocket-launch text-indigo-500"></i>
+                        Herramientas Principales
+                    </h2>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button id="nav-diagnosis" class="nav-button p-3 rounded-lg font-semibold flex items-center justify-center gap-2">
+                            <i class="ph-chat-circle-dots"></i> Diagnóstico
+                        </button>
+                        <button id="nav-calendar" class="nav-button p-3 rounded-lg font-semibold flex items-center justify-center gap-2">
+                            <i class="ph-calendar"></i> Calendario
+                        </button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2 class="text-xl font-bold text-gray-700 mb-4 flex items-center gap-2">
+                        <i class="ph-camera-plus text-green-500"></i>
+                        Diagnosticar Cultivo
+                    </h2>
+                    <label for="file-upload" class="custom-file-upload">
+                        <i class="ph-upload-simple text-3xl text-gray-400 mb-2"></i>
+                        <span class="text-green-600 font-semibold">Seleccionar imagen</span>
+                    </label>
+                    <input id="file-upload" type="file" accept="image/*"/>
+                </div>
+
+                <div class="card">
+                    <h2 class="text-xl font-bold text-gray-700 mb-4 flex items-center gap-2">
+                        <i class="ph-test-tube text-orange-500"></i>
+                        Análisis de Suelo
+                    </h2>
+                    <label for="ph-slider" class="block mb-2 text-sm font-medium text-gray-600">pH del Suelo: <span id="ph-value" class="font-bold text-gray-800">7.0</span></label>
+                    <input id="ph-slider" type="range" min="4.0" max="9.0" value="7.0" step="0.1">
+                </div>
+
+                <div class="card">
+                    <h2 class="text-xl font-bold text-gray-700 mb-4 flex items-center gap-2">
+                        <i class="ph-thermometer-simple text-red-500"></i>
+                        Clima en <span id="location-name">...</span>
+                    </h2>
+                    <div id="weather-info" class="text-gray-600 flex justify-center items-center h-20">
+                        <div class="loader"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Columna Derecha (Vistas Dinámicas) -->
+            <div class="card lg:col-span-2">
+                <!-- VISTA 1: DIAGNÓSTICO Y CHAT -->
+                <div id="view-diagnosis">
+                    <h2 class="text-2xl font-bold text-gray-700 mb-4 flex items-center gap-2">
+                        <i class="ph-lightbulb-filament text-blue-500"></i>
+                        Asistente Interactivo
+                    </h2>
+                    <div id="chat-container" class="h-[60vh] flex flex-col">
+                        <div id="chat-messages" class="flex-1 space-y-4 overflow-y-auto p-4 flex flex-col">
+                            <!-- Mensajes del chat aparecerán aquí -->
+                            <div id="initial-message" class="m-auto text-center">
+                                <p class="text-gray-500">Sube una foto para iniciar un diagnóstico.</p>
+                                <div id="tip-of-the-day" class="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg text-sm">
+                                    <p class="font-semibold text-green-800">Consejo del Día:</p>
+                                    <p class="text-green-700">Cargando...</p>
+                                </div>
+                            </div>
+                            <div id="loader-container" class="hidden m-auto text-center">
+                                <div class="loader mx-auto"></div>
+                                <p class="mt-4 text-gray-500">La IA está analizando...</p>
+                            </div>
+                        </div>
+                        <form id="chat-form" class="mt-4 border-t pt-4 hidden">
+                            <div class="flex gap-2">
+                                <input id="chat-input" type="text" class="flex-1 border-gray-300 rounded-lg p-2 focus:ring-green-500 focus:border-green-500" placeholder="Escribe tu pregunta..." autocomplete="off">
+                                <button type="submit" class="bg-green-600 text-white p-2 rounded-lg hover:bg-green-700 disabled:bg-gray-400">
+                                    <i class="ph-paper-plane-tilt-fill text-2xl"></i>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- VISTA 2: CALENDARIO DE CULTIVO -->
+                <div id="view-calendar" class="hidden">
+                    <h2 class="text-2xl font-bold text-gray-700 mb-4 flex items-center gap-2">
+                        <i class="ph-calendar-check text-teal-500"></i>
+                        Calendario de Cultivo Inteligente
+                    </h2>
+                    <div class="space-y-4">
+                        <div>
+                            <label for="crop-select" class="block text-sm font-medium text-gray-700">Selecciona un cultivo:</label>
+                            <select id="crop-select" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+                                <option>Maíz</option>
+                                <option>Frijol</option>
+                                <option>Tomate</option>
+                                <option>Café</option>
+                                <option>Plátano</option>
+                                <option>Papa</option>
+                                <option>Chile</option>
+                            </select>
+                        </div>
+                        <button id="generate-calendar-btn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-lg flex items-center justify-center gap-2 transition-colors">
+                            <i class="ph-magic-wand"></i>
+                            Generar Calendario
+                        </button>
+                        <div id="calendar-results-container" class="prose max-w-none mt-4">
+                            <!-- El calendario generado aparecerá aquí -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script type="module">
+        // --- ELEMENTOS DEL DOM ---
+        const fileUpload = document.getElementById('file-upload');
+        const loaderContainer = document.getElementById('loader-container');
+        const initialMessage = document.getElementById('initial-message');
+        const weatherInfo = document.getElementById('weather-info');
+        const locationName = document.getElementById('location-name');
+        const tipOfTheDayContainer = document.getElementById('tip-of-the-day').querySelector('p:last-child');
+        const phSlider = document.getElementById('ph-slider');
+        const phValue = document.getElementById('ph-value');
+        
+        // --- Elementos de Chat ---
+        const chatContainer = document.getElementById('chat-container');
+        const chatMessages = document.getElementById('chat-messages');
+        const chatForm = document.getElementById('chat-form');
+        const chatInput = document.getElementById('chat-input');
+        
+        // --- Elementos de Calendario ---
+        const cropSelect = document.getElementById('crop-select');
+        const generateCalendarBtn = document.getElementById('generate-calendar-btn');
+        const calendarResultsContainer = document.getElementById('calendar-results-container');
+
+        // --- Elementos de Navegación ---
+        const navDiagnosis = document.getElementById('nav-diagnosis');
+        const navCalendar = document.getElementById('nav-calendar');
+        const viewDiagnosis = document.getElementById('view-diagnosis');
+        const viewCalendar = document.getElementById('view-calendar');
+
+        // --- ESTADO DE LA APLICACIÓN ---
+        let conversationHistory = [];
+        let userLocation = { lat: 14.10, lon: -87.21, name: 'Tegucigalpa' }; // Ubicación por defecto
+
+        // --- FUNCIONES DE NAVEGACIÓN ---
+        function switchView(view) {
+            if (view === 'diagnosis') {
+                viewDiagnosis.classList.remove('hidden');
+                viewCalendar.classList.add('hidden');
+                navDiagnosis.classList.add('active');
+                navCalendar.classList.remove('active');
+            } else if (view === 'calendar') {
+                viewDiagnosis.classList.add('hidden');
+                viewCalendar.classList.remove('hidden');
+                navDiagnosis.classList.remove('active');
+                navCalendar.classList.add('active');
+            }
+        }
+        navDiagnosis.addEventListener('click', () => switchView('diagnosis'));
+        navCalendar.addEventListener('click', () => switchView('calendar'));
+
+        // --- FUNCIÓN SEGURA PARA LLAMAR A LA IA ---
+        async function callGemini(payload) {
+            // La URL ahora apunta a nuestra función de proxy segura en Netlify.
+            const PROXY_URL = '/.netlify/functions/gemini-proxy';
+
+            try {
+                const response = await fetch(PROXY_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    console.error("Error desde el proxy:", error);
+                    return "Error: No se pudo comunicar con la IA a través del servidor. Revisa la configuración en Netlify.";
+                }
+
+                const result = await response.json();
+                if (result.candidates && result.candidates[0].content && result.candidates[0].content.parts[0]) {
+                    return result.candidates[0].content.parts[0].text;
+                }
+                return "No se recibió una respuesta válida de la IA.";
+
+            } catch (e) {
+                console.error("Error de red al llamar al proxy:", e);
+                return "Error de red: No se pudo conectar con el servidor. ¿Estás en línea?";
+            }
+        }
+
+        function formatResponse(markdownText) {
+            return markdownText
+                .replace(/^### (.*$)/gim, '<h3 class="text-lg font-semibold mt-3 mb-1 text-gray-800">$1</h3>')
+                .replace(/^## (.*$)/gim, '<h2 class="text-xl font-bold mt-4 mb-2">$1</h2>')
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/^- (.*$)/gim, '<li class="ml-4">$1</li>')
+                .replace(/(<\/li>)\s*<li>/g, '$1<li>')
+                .replace(/(<li>.*<\/li>)/gs, '<ul class="list-disc list-inside space-y-1">$1</ul>')
+                .replace(/<\/ul>\n?<ul>/g, '')
+                .replace(/\n/g, '<br>');
+        }
+
+        // --- LÓGICA DE DIAGNÓSTICO Y CHAT ---
+        fileUpload.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+            switchView('diagnosis');
+            const reader = new FileReader();
+            reader.onload = (e) => analyzeImage(e.target.result);
+            reader.readAsDataURL(file);
+        });
+
+        async function analyzeImage(base64ImageData) {
+            initialMessage.classList.add('hidden');
+            loaderContainer.classList.remove('hidden');
+            chatMessages.innerHTML = '';
+            chatMessages.appendChild(loaderContainer);
+            chatForm.classList.add('hidden');
+            
+            const currentPh = phSlider.value;
+            const initialPrompt = `
+                Eres un asistente experto en agronomía y agricultura sostenible, especializado en regiones tropicales como Honduras.
+                Analiza la siguiente imagen de una hoja de planta y considera el dato del pH del suelo proporcionado.
+                **Datos Recibidos:** pH del Suelo: ${currentPh}.
+                **Tu Tarea:** Genera un reporte completo con secciones para: 1. Identificación de la Planta, 2. Diagnóstico Visual, 3. Análisis del pH del Suelo, 4. Plan de Acción Integrado (con soluciones para el diagnóstico y para corregir el pH si es necesario), 5. Necesidades Generales de la Planta (Luz, Agua, Nutrientes).
+                Responde en español, con un tono amigable y educativo. Al final, invita al usuario a hacer más preguntas si tiene dudas.
+            `;
+            
+            conversationHistory = [{ role: "user", parts: [{ text: initialPrompt }, { inlineData: { mimeType: "image/jpeg", data: base64ImageData.split(',')[1] } }] }];
+            const payload = { contents: conversationHistory };
+
+            const analysisText = await callGemini(payload);
+            
+            loaderContainer.classList.add('hidden');
+            conversationHistory.push({ role: "model", parts: [{ text: analysisText }] });
+            appendChatMessage(analysisText, 'assistant');
+            chatForm.classList.remove('hidden');
+        }
+
+        chatForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const userMessage = chatInput.value.trim();
+            if (!userMessage) return;
+
+            appendChatMessage(userMessage, 'user');
+            chatInput.value = '';
+            chatInput.disabled = true;
+
+            conversationHistory.push({ role: "user", parts: [{ text: userMessage }] });
+            const payload = { contents: conversationHistory };
+
+            const typingLoader = document.createElement('div');
+            typingLoader.className = 'chat-message chat-assistant';
+            typingLoader.innerHTML = `<div class="loader" style="width:25px; height:25px; border-width:3px;"></div>`;
+            chatMessages.appendChild(typingLoader);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+
+            const aiResponse = await callGemini(payload);
+            
+            typingLoader.remove();
+            conversationHistory.push({ role: "model", parts: [{ text: aiResponse }] });
+            appendChatMessage(aiResponse, 'assistant');
+            chatInput.disabled = false;
+            chatInput.focus();
+        });
+
+        function appendChatMessage(text, sender) {
+            const messageWrapper = document.createElement('div');
+            messageWrapper.className = `chat-message ${sender === 'user' ? 'chat-user' : 'chat-assistant'}`;
+            messageWrapper.innerHTML = formatResponse(text);
+            chatMessages.appendChild(messageWrapper);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // --- LÓGICA DEL CALENDARIO DE CULTIVO ---
+        generateCalendarBtn.addEventListener('click', async () => {
+            const selectedCrop = cropSelect.value;
+            calendarResultsContainer.innerHTML = `<div class="flex justify-center items-center flex-col"><div class="loader"></div><p class="mt-2 text-gray-500">Generando calendario para ${selectedCrop}...</p></div>`;
+
+            const calendarPrompt = `
+                Actúa como un agrónomo experto para Honduras. Crea un calendario de cultivo detallado y práctico para **${selectedCrop}**.
+                Considera que la ubicación del usuario es **${userLocation.name}**.
+                El calendario debe estar en formato Markdown y cubrir las siguientes fases clave, con rangos de fechas recomendados y acciones específicas:
+                - **Preparación del Terreno:** (Limpieza, arado, fertilización inicial).
+                - **Época de Siembra:** (Mejores meses para sembrar, considerando primera y postrera si es aplicable).
+                - **Cuidados y Mantenimiento:** (Riego, control de malezas, fertilización de seguimiento).
+                - **Control de Plagas y Enfermedades:** (Métodos preventivos y orgánicos comunes para este cultivo en la región).
+                - **Cosecha:** (Tiempo estimado hasta la cosecha, señales de que está listo).
+                Usa un lenguaje claro y fácil de entender para un pequeño agricultor.
+            `;
+            
+            const payload = { contents: [{ role: "user", parts: [{ text: calendarPrompt }] }] };
+            const calendarText = await callGemini(payload);
+            calendarResultsContainer.innerHTML = formatResponse(calendarText);
+        });
+
+        // --- FUNCIONES AUXILIARES (Clima, etc.) ---
+        phSlider.addEventListener('input', (event) => {
+            phValue.textContent = parseFloat(event.target.value).toFixed(1);
+        });
+        
+        async function fetchWeather(lat, lon) {
+            const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weather_code&timezone=auto`;
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                const temp = `${Math.round(data.current.temperature_2m)}°C`;
+                const code = data.current.weather_code;
+                const descriptions = { 0: 'Despejado', 1: 'Mayormente despejado', 2: 'Parcialmente nublado', 3: 'Nublado', 45: 'Niebla', 61: 'Lluvia', 80: 'Chubascos', 95: 'Tormenta' };
+                const description = descriptions[code] || 'No disponible';
+                weatherInfo.innerHTML = `<p class="text-2xl font-bold text-gray-800">${temp}</p><p class="text-gray-600">${description}</p>`;
+                
+                const geoUrl = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}`;
+                const geoResponse = await fetch(geoUrl);
+                const geoData = await geoResponse.json();
+                userLocation = { lat, lon, name: geoData.address.city || geoData.address.town || 'tu región' };
+                locationName.textContent = userLocation.name;
+            } catch (error) {
+                console.error("Error al obtener el clima:", error);
+                weatherInfo.innerHTML = `<p class="text-center text-red-500 text-sm">No se pudo cargar el clima.</p>`;
+                locationName.textContent = 'Error';
+            }
+        }
+
+        function initializeWeather() {
+             if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => fetchWeather(position.coords.latitude, position.coords.longitude),
+                    () => fetchWeather(userLocation.lat, userLocation.lon)
+                );
+            } else {
+                fetchWeather(userLocation.lat, userLocation.lon);
+            }
+        }
+        
+        async function fetchTipOfTheDay() {
+            const prompt = "Dame un consejo corto, práctico y novedoso sobre agricultura sostenible para pequeños agricultores en Centroamérica.";
+            try {
+                const payload = { contents: [{ role: "user", parts: [{ text: prompt }] }] };
+                const tip = await callGemini(payload);
+                tipOfTheDayContainer.textContent = tip;
+            } catch (error) {
+                tipOfTheDayContainer.textContent = "Recuerda rotar tus cultivos para mantener la salud del suelo.";
+            }
+        }
+
+        // --- INICIALIZACIÓN DE LA APP ---
+        window.onload = () => {
+            switchView('diagnosis');
+            initializeWeather();
+            fetchTipOfTheDay();
+        };
+    </script>
+</body>
+</html>
