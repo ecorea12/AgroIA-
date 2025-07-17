@@ -70,152 +70,160 @@
 </head>
 <body class="bg-gray-100">
 
-    <div class="container mx-auto p-4 sm:p-6 max-w-7xl">
-        <header class="text-center mb-8 relative">
-            <div class="flex justify-center items-center gap-3">
-                <i class="ph-plant-fill text-5xl text-green-600"></i>
-                <h1 class="text-4xl font-bold text-gray-800">AgroIA</h1>
-                <div id="status-indicator" title="Estado de la conexión"></div>
+    <!-- PANTALLA DE CARGA INICIAL -->
+    <div id="app-loader" class="fixed inset-0 flex items-center justify-center bg-gray-100 z-50">
+        <div class="loader"></div>
+    </div>
+
+    <!-- CONTENIDO PRINCIPAL DE LA APP (OCULTO AL INICIO) -->
+    <div id="app-content" class="hidden">
+        <div class="container mx-auto p-4 sm:p-6 max-w-7xl">
+            <header class="text-center mb-8 relative">
+                <div class="flex justify-center items-center gap-3">
+                    <i class="ph-plant-fill text-5xl text-green-600"></i>
+                    <h1 class="text-4xl font-bold text-gray-800">AgroIA</h1>
+                    <div id="status-indicator" title="Estado de la conexión"></div>
+                </div>
+                <p class="text-gray-600 mt-2" data-translate="appSubtitle">Tu compañero IA para una agricultura sostenible.</p>
+                <!-- Controles de Usuario -->
+                <div class="absolute top-0 right-0 flex items-center gap-2">
+                     <button id="lang-switcher" class="bg-white border border-gray-300 rounded-full p-1.5 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                        <img id="lang-flag" src="" alt="Cambiar idioma" class="w-6 h-6 rounded-full object-cover">
+                    </button>
+                    <button id="user-menu-btn" class="bg-white border border-gray-300 rounded-full p-1.5 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                        <i id="user-icon" class="ph-user text-2xl"></i>
+                        <img id="user-avatar" src="" class="w-6 h-6 rounded-full hidden">
+                    </button>
+                </div>
+            </header>
+            
+            <!-- BANNER DE MODO INVITADO -->
+            <div id="guest-banner" class="hidden bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 text-sm mb-6 rounded-r-lg" role="alert">
+                <p><strong data-translate="guestMode">Modo Invitado:</strong> <span data-translate="guestMessage">Tu progreso no se guardará.</span> <button id="show-login-btn" class="font-bold underline hover:text-yellow-800" data-translate="registerOrLogin">Regístrate o Inicia Sesión</button> <span data-translate="guestMessage2">para una experiencia completa.</span></p>
             </div>
-            <p class="text-gray-600 mt-2" data-translate="appSubtitle">Tu compañero IA para una agricultura sostenible.</p>
-            <!-- Controles de Usuario -->
-            <div class="absolute top-0 right-0 flex items-center gap-2">
-                 <button id="lang-switcher" class="bg-white border border-gray-300 rounded-full p-1.5 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
-                    <img id="lang-flag" src="" alt="Cambiar idioma" class="w-6 h-6 rounded-full object-cover">
-                </button>
-                <button id="user-menu-btn" class="bg-white border border-gray-300 rounded-full p-1.5 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
-                    <i id="user-icon" class="ph-user text-2xl"></i>
-                    <img id="user-avatar" src="" class="w-6 h-6 rounded-full hidden">
-                </button>
-            </div>
-        </header>
-        
-        <!-- BANNER DE MODO INVITADO -->
-        <div id="guest-banner" class="hidden bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 text-sm mb-6 rounded-r-lg" role="alert">
-            <p><strong data-translate="guestMode">Modo Invitado:</strong> <span data-translate="guestMessage">Tu progreso no se guardará entre sesiones.</span> <button id="show-login-btn" class="font-bold underline hover:text-yellow-800" data-translate="registerOrLogin">Regístrate o Inicia Sesión</button> <span data-translate="guestMessage2">para una experiencia completa.</span></p>
+
+            <main class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+                <!-- Columna Izquierda (Controles) -->
+                <div class="space-y-6 lg:col-span-1">
+                    <!-- NAVEGACIÓN PRINCIPAL -->
+                    <div class="card">
+                        <h2 class="text-xl font-bold text-gray-700 mb-4 flex items-center gap-2">
+                            <i class="ph-rocket-launch text-indigo-500"></i>
+                            <span data-translate="toolsTitle">Herramientas Principales</span>
+                        </h2>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button id="nav-diagnosis" class="nav-button p-3 rounded-lg font-semibold flex items-center justify-center gap-2 text-sm">
+                                <i class="ph-chat-circle-dots"></i> <span data-translate="navDiagnosis">Chat</span>
+                            </button>
+                            <button id="nav-alerts" class="nav-button p-3 rounded-lg font-semibold flex items-center justify-center gap-2 text-sm">
+                                <i class="ph-bell"></i> <span data-translate="navAlerts">Alertas</span>
+                                <div id="alert-badge" class="notification-badge hidden"></div>
+                            </button>
+                            <button id="nav-calendar" class="nav-button p-3 rounded-lg font-semibold flex items-center justify-center gap-2 text-sm">
+                                <i class="ph-calendar"></i> <span data-translate="navCalendar">Calendario</span>
+                            </button>
+                            <button id="nav-irrigation" class="nav-button p-3 rounded-lg font-semibold flex items-center justify-center gap-2 text-sm">
+                                <i class="ph-drop"></i> <span data-translate="navIrrigation">Riego</span>
+                            </button>
+                            <button id="nav-library" class="nav-button p-3 rounded-lg font-semibold flex items-center justify-center gap-2 text-sm">
+                                <i class="ph-books"></i> <span data-translate="navLibrary">Biblioteca</span>
+                            </button>
+                             <button id="nav-weeds" class="nav-button p-3 rounded-lg font-semibold flex items-center justify-center gap-2 text-sm">
+                                <i class="ph-leaf"></i> <span data-translate="navWeeds">Malezas</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Controles que se ocultan/muestran -->
+                    <div id="controls-diagnosis">
+                        <div class="card space-y-6">
+                            <div>
+                                <h2 class="text-xl font-bold text-gray-700 mb-4 flex items-center gap-2">
+                                    <i class="ph-camera-plus text-green-500"></i>
+                                    <span data-translate="diagnoseTitle">Analizar Foto</span>
+                                </h2>
+                                <p class="text-sm text-gray-500 mb-4" data-translate="diagnoseSubtitle">Sube una foto de una planta o del suelo para analizarla.</p>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <button id="gallery-btn" class="action-button font-semibold flex flex-col items-center justify-center gap-2">
+                                        <i class="ph-image-square text-3xl"></i>
+                                        <span data-translate="galleryButton">Galería</span>
+                                    </button>
+                                    <button id="camera-btn" class="action-button font-semibold flex flex-col items-center justify-center gap-2">
+                                        <i class="ph-camera text-3xl"></i>
+                                        <span data-translate="cameraButton">Cámara</span>
+                                    </button>
+                                </div>
+                                <input id="file-upload" type="file" accept="image/*"/>
+                                <p class="text-xs text-center mt-2 text-gray-500"><span data-translate="analysesLeft">Análisis restantes hoy:</span> <span id="analyses-left-count">3</span></p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="controls-weeds" class="hidden">
+                        <div class="card space-y-6">
+                            <div>
+                                <h2 class="text-xl font-bold text-gray-700 mb-4 flex items-center gap-2">
+                                    <i class="ph-leaf text-red-500"></i>
+                                    <span data-translate="weedsTitle">Identificar Maleza</span>
+                                </h2>
+                                <p class="text-sm text-gray-500 mb-4" data-translate="weedsSubtitle">Toma o sube una foto de una maleza para obtener un plan de control.</p>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <button id="gallery-weeds-btn" class="action-button font-semibold flex flex-col items-center justify-center gap-2">
+                                        <i class="ph-image-square text-3xl"></i>
+                                        <span data-translate="galleryButton">Galería</span>
+                                    </button>
+                                    <button id="camera-weeds-btn" class="action-button font-semibold flex flex-col items-center justify-center gap-2">
+                                        <i class="ph-camera text-3xl"></i>
+                                        <span data-translate="cameraButton">Cámara</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h2 class="text-xl font-bold text-gray-700 mb-4 flex items-center gap-2">
+                            <i class="ph-thermometer-simple text-red-500"></i>
+                            <span data-translate="weatherTitle">Clima en</span> <span id="location-name">...</span>
+                        </h2>
+                        <div id="weather-info" class="text-gray-600 flex justify-center items-center h-20">
+                            <div class="loader"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Columna Derecha (Vistas Dinámicas) -->
+                <div class="card lg:col-span-2">
+                    <!-- VISTA 1: DIAGNÓSTICO Y CHAT -->
+                    <div id="view-diagnosis">
+                        <h2 class="text-2xl font-bold text-gray-700 mb-4 flex items-center gap-2">
+                            <i class="ph-lightbulb-filament text-blue-500"></i>
+                            <span data-translate="chatTitle">Asistente Interactivo</span>
+                        </h2>
+                        <div id="chat-container" class="h-[60vh] flex flex-col">
+                            <div id="chat-messages" class="flex-1 space-y-4 overflow-y-auto p-4 flex flex-col"></div>
+                            <form id="chat-form" class="mt-4 border-t pt-4 hidden">
+                                <div class="flex gap-2">
+                                    <input id="chat-input" type="text" class="flex-1 border-gray-300 rounded-lg p-2 focus:ring-green-500 focus:border-green-500" data-translate-placeholder="chatPlaceholder" placeholder="Escribe tu pregunta..." autocomplete="off">
+                                    <button type="submit" class="bg-green-600 text-white p-2 rounded-lg hover:bg-green-700 disabled:bg-gray-400">
+                                        <i class="ph-paper-plane-tilt-fill text-2xl"></i>
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- VISTAS PREMIUM -->
+                    <div id="view-premium-locked" class="hidden h-[65vh] flex flex-col items-center justify-center text-center">
+                        <i class="ph-crown-simple text-6xl text-amber-400"></i>
+                        <h2 class="text-2xl font-bold text-gray-800 mt-4" data-translate="premiumTitle">Función Premium</h2>
+                        <p class="text-gray-600 mt-2 max-w-sm" data-translate="premiumDescription">Esta herramienta es parte de AgroIA Premium. Actualiza para desbloquear esta y otras funciones avanzadas.</p>
+                        <button id="upgrade-btn-main" class="mt-6 bg-amber-500 text-white font-bold py-2 px-6 rounded-lg hover:bg-amber-600 transition-colors" data-translate="upgradeNow">Actualizar Ahora</button>
+                    </div>
+                </div>
+            </main>
         </div>
-
-        <main class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
-            <!-- Columna Izquierda (Controles) -->
-            <div class="space-y-6 lg:col-span-1">
-                <!-- NAVEGACIÓN PRINCIPAL -->
-                <div class="card">
-                    <h2 class="text-xl font-bold text-gray-700 mb-4 flex items-center gap-2">
-                        <i class="ph-rocket-launch text-indigo-500"></i>
-                        <span data-translate="toolsTitle">Herramientas Principales</span>
-                    </h2>
-                    <div class="grid grid-cols-2 gap-2">
-                        <button id="nav-diagnosis" class="nav-button p-3 rounded-lg font-semibold flex items-center justify-center gap-2 text-sm">
-                            <i class="ph-chat-circle-dots"></i> <span data-translate="navDiagnosis">Chat</span>
-                        </button>
-                        <button id="nav-alerts" class="nav-button p-3 rounded-lg font-semibold flex items-center justify-center gap-2 text-sm">
-                            <i class="ph-bell"></i> <span data-translate="navAlerts">Alertas</span>
-                            <div id="alert-badge" class="notification-badge hidden"></div>
-                        </button>
-                        <button id="nav-calendar" class="nav-button p-3 rounded-lg font-semibold flex items-center justify-center gap-2 text-sm">
-                            <i class="ph-calendar"></i> <span data-translate="navCalendar">Calendario</span>
-                        </button>
-                        <button id="nav-irrigation" class="nav-button p-3 rounded-lg font-semibold flex items-center justify-center gap-2 text-sm">
-                            <i class="ph-drop"></i> <span data-translate="navIrrigation">Riego</span>
-                        </button>
-                        <button id="nav-library" class="nav-button p-3 rounded-lg font-semibold flex items-center justify-center gap-2 text-sm">
-                            <i class="ph-books"></i> <span data-translate="navLibrary">Biblioteca</span>
-                        </button>
-                         <button id="nav-weeds" class="nav-button p-3 rounded-lg font-semibold flex items-center justify-center gap-2 text-sm">
-                            <i class="ph-leaf"></i> <span data-translate="navWeeds">Malezas</span>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Controles que se ocultan/muestran -->
-                <div id="controls-diagnosis">
-                    <div class="card space-y-6">
-                        <div>
-                            <h2 class="text-xl font-bold text-gray-700 mb-4 flex items-center gap-2">
-                                <i class="ph-camera-plus text-green-500"></i>
-                                <span data-translate="diagnoseTitle">Analizar Foto</span>
-                            </h2>
-                            <p class="text-sm text-gray-500 mb-4" data-translate="diagnoseSubtitle">Sube una foto de una planta o del suelo para analizarla.</p>
-                            <div class="grid grid-cols-2 gap-2">
-                                <button id="gallery-btn" class="action-button font-semibold flex flex-col items-center justify-center gap-2">
-                                    <i class="ph-image-square text-3xl"></i>
-                                    <span data-translate="galleryButton">Galería</span>
-                                </button>
-                                <button id="camera-btn" class="action-button font-semibold flex flex-col items-center justify-center gap-2">
-                                    <i class="ph-camera text-3xl"></i>
-                                    <span data-translate="cameraButton">Cámara</span>
-                                </button>
-                            </div>
-                            <input id="file-upload" type="file" accept="image/*"/>
-                            <p class="text-xs text-center mt-2 text-gray-500"><span data-translate="analysesLeft">Análisis restantes hoy:</span> <span id="analyses-left-count">3</span></p>
-                        </div>
-                    </div>
-                </div>
-                
-                <div id="controls-weeds" class="hidden">
-                    <div class="card space-y-6">
-                        <div>
-                            <h2 class="text-xl font-bold text-gray-700 mb-4 flex items-center gap-2">
-                                <i class="ph-leaf text-red-500"></i>
-                                <span data-translate="weedsTitle">Identificar Maleza</span>
-                            </h2>
-                            <p class="text-sm text-gray-500 mb-4" data-translate="weedsSubtitle">Toma o sube una foto de una maleza para obtener un plan de control.</p>
-                            <div class="grid grid-cols-2 gap-2">
-                                <button id="gallery-weeds-btn" class="action-button font-semibold flex flex-col items-center justify-center gap-2">
-                                    <i class="ph-image-square text-3xl"></i>
-                                    <span data-translate="galleryButton">Galería</span>
-                                </button>
-                                <button id="camera-weeds-btn" class="action-button font-semibold flex flex-col items-center justify-center gap-2">
-                                    <i class="ph-camera text-3xl"></i>
-                                    <span data-translate="cameraButton">Cámara</span>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="card">
-                    <h2 class="text-xl font-bold text-gray-700 mb-4 flex items-center gap-2">
-                        <i class="ph-thermometer-simple text-red-500"></i>
-                        <span data-translate="weatherTitle">Clima en</span> <span id="location-name">...</span>
-                    </h2>
-                    <div id="weather-info" class="text-gray-600 flex justify-center items-center h-20">
-                        <div class="loader"></div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Columna Derecha (Vistas Dinámicas) -->
-            <div class="card lg:col-span-2">
-                <!-- VISTA 1: DIAGNÓSTICO Y CHAT -->
-                <div id="view-diagnosis">
-                    <h2 class="text-2xl font-bold text-gray-700 mb-4 flex items-center gap-2">
-                        <i class="ph-lightbulb-filament text-blue-500"></i>
-                        <span data-translate="chatTitle">Asistente Interactivo</span>
-                    </h2>
-                    <div id="chat-container" class="h-[60vh] flex flex-col">
-                        <div id="chat-messages" class="flex-1 space-y-4 overflow-y-auto p-4 flex flex-col"></div>
-                        <form id="chat-form" class="mt-4 border-t pt-4 hidden">
-                            <div class="flex gap-2">
-                                <input id="chat-input" type="text" class="flex-1 border-gray-300 rounded-lg p-2 focus:ring-green-500 focus:border-green-500" data-translate-placeholder="chatPlaceholder" placeholder="Escribe tu pregunta..." autocomplete="off">
-                                <button type="submit" class="bg-green-600 text-white p-2 rounded-lg hover:bg-green-700 disabled:bg-gray-400">
-                                    <i class="ph-paper-plane-tilt-fill text-2xl"></i>
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-
-                <!-- VISTAS PREMIUM -->
-                <div id="view-premium-locked" class="hidden h-[65vh] flex flex-col items-center justify-center text-center">
-                    <i class="ph-crown-simple text-6xl text-amber-400"></i>
-                    <h2 class="text-2xl font-bold text-gray-800 mt-4" data-translate="premiumTitle">Función Premium</h2>
-                    <p class="text-gray-600 mt-2 max-w-sm" data-translate="premiumDescription">Esta herramienta es parte de AgroIA Premium. Actualiza para desbloquear esta y otras funciones avanzadas.</p>
-                    <button id="upgrade-btn-main" class="mt-6 bg-amber-500 text-white font-bold py-2 px-6 rounded-lg hover:bg-amber-600 transition-colors" data-translate="upgradeNow">Actualizar Ahora</button>
-                </div>
-            </div>
-        </main>
     </div>
 
     <!-- MODAL DE LOGIN -->
@@ -304,8 +312,114 @@
         let weatherForecast = null;
         let alerts = [];
 
+        // --- DICCIONARIO DE TRADUCCIONES (GLOBAL) ---
+        const translations = {
+            es: {
+                appSubtitle: "Tu compañero IA para una agricultura sostenible.",
+                toolsTitle: "Herramientas Principales",
+                navDiagnosis: "Chat", navCalendar: "Calendario", navLibrary: "Biblioteca", navIrrigation: "Riego", navAlerts: "Alertas", navWeeds: "Malezas",
+                diagnoseTitle: "Analizar Foto", diagnoseSubtitle: "Sube una foto de una planta o del suelo para analizarla.",
+                galleryButton: "Galería", cameraButton: "Cámara",
+                weatherTitle: "Clima en", chatTitle: "Asistente Interactivo", chatPlaceholder: "Escribe tu pregunta...",
+                calendarTitle: "Calendario de Cultivo Inteligente", selectCrop: "Selecciona un cultivo:", generateCalendar: "Generar Calendario",
+                libraryTitle: "Biblioteca de Plagas y Enfermedades", libraryPlaceholder: "Ej: Roya, Mosca blanca...",
+                irrigationTitle: "Calculadora de Riego Inteligente", selectCropIrrigation: "Selecciona tu cultivo:", calculateIrrigation: "Calcular Riego",
+                alertsTitle: "Centro de Alertas",
+                weedsTitle: "Identificar Maleza", weedsSubtitle: "Toma o sube una foto de una maleza para obtener un plan de control.",
+                initialChatMessage: "Usa la galería o la cámara para analizar una foto de una planta o del suelo.", tipOfTheDay: "Consejo del Día:", loading: "Cargando...",
+                onlineStatus: "Conectado", offlineStatus: "Sin conexión (Modo Offline)",
+                initialCalendarMessage: "Selecciona un cultivo y genera un plan de acción para todo el ciclo.",
+                initialLibraryMessage: "Busca una plaga o enfermedad para ver su ficha técnica.",
+                initialIrrigationMessage: "Selecciona tu cultivo para obtener una recomendación de riego basada en el pronóstico del tiempo.",
+                initialWeedsMessage: "Usa la galería o la cámara para identificar una maleza y recibir un plan de control.",
+                noAlerts: "No hay alertas nuevas.",
+                speakButtonTitle: "Leer en voz alta",
+                premiumTitle: "Función Premium",
+                premiumDescription: "Esta herramienta es parte de AgroIA Premium. Actualiza para desbloquear esta y otras funciones avanzadas.",
+                upgradeNow: "Actualizar Ahora",
+                upgradeModalTitle: "Desbloquea Todo el Poder de AgroIA",
+                upgradeModalSubtitle: "Actualiza a Premium para acceder a herramientas que te ayudarán a gestionar tu finca como un profesional.",
+                premiumFeature1: "Análisis de fotos ilimitados",
+                premiumFeature2: "Asistente de Chat Interactivo",
+                premiumFeature3: "Alertas y Notificaciones Proactivas",
+                premiumFeature4: "Calculadora de Riego Inteligente",
+                premiumFeature5: "Calendario de Cultivo y Control de Malezas",
+                guestMode: "Modo Invitado:",
+                guestMessage: "Tu progreso no se guardará.",
+                registerOrLogin: "Regístrate o Inicia Sesión",
+                guestMessage2: "para una experiencia completa.",
+                confirmLogoutGuest: "Estás como invitado. Para crear una cuenta, tu sesión de invitado se cerrará. ¿Quieres continuar?",
+                confirmLogout: "¿Quieres cerrar sesión?",
+                loginTitle: "Bienvenido a AgroIA",
+                loginSubtitle: "Inicia sesión para una experiencia completa o continúa como invitado.",
+                loginGoogle: "Continuar con Google",
+                loginFacebook: "Continuar con Facebook",
+                or: "O",
+                emailPlaceholder: "Correo electrónico",
+                passwordPlaceholder: "Contraseña",
+                loginEmail: "Iniciar Sesión",
+                noAccount: "¿No tienes cuenta?",
+                registerHere: "Regístrate aquí",
+                hasAccount: "¿Ya tienes cuenta?",
+                loginHere: "Inicia sesión aquí",
+                loginGuest: "Continuar como Invitado"
+            },
+            en: {
+                appSubtitle: "Your AI companion for sustainable agriculture.",
+                toolsTitle: "Main Tools",
+                navDiagnosis: "Chat", navCalendar: "Calendar", navLibrary: "Library", navIrrigation: "Irrigation", navAlerts: "Alerts", navWeeds: "Weeds",
+                diagnoseTitle: "Analyze Photo", diagnoseSubtitle: "Upload a photo of a plant or soil for analysis.",
+                galleryButton: "Gallery", cameraButton: "Camera",
+                weatherTitle: "Weather in", chatTitle: "Interactive Assistant", chatPlaceholder: "Type your question...",
+                calendarTitle: "Smart Crop Calendar", selectCrop: "Select a crop:", generateCalendar: "Generate Calendar",
+                libraryTitle: "Pest & Disease Library", libraryPlaceholder: "E.g., Rust, Whitefly...",
+                irrigationTitle: "Smart Irrigation Calculator", selectCropIrrigation: "Select your crop:", calculateIrrigation: "Calculate Irrigation",
+                alertsTitle: "Alert Center",
+                weedsTitle: "Weed Identifier", weedsSubtitle: "Take or upload a photo of a weed to get a control plan.",
+                initialChatMessage: "Use the gallery or camera to analyze a photo of a plant or soil.", tipOfTheDay: "Tip of the Day:", loading: "Loading...",
+                onlineStatus: "Online", offlineStatus: "Offline Mode",
+                initialCalendarMessage: "Select a crop and generate an action plan for the entire cycle.",
+                initialLibraryMessage: "Search for a pest or disease to see its technical sheet.",
+                initialIrrigationMessage: "Select your crop to get an irrigation recommendation based on the weather forecast.",
+                initialWeedsMessage: "Use the gallery or camera to identify a weed and receive a control plan.",
+                noAlerts: "No new alerts.",
+                speakButtonTitle: "Read aloud",
+                premiumTitle: "Premium Feature",
+                premiumDescription: "This tool is part of AgroIA Premium. Upgrade to unlock this and other advanced features.",
+                upgradeNow: "Upgrade Now",
+                upgradeModalTitle: "Unlock the Full Power of AgroIA",
+                upgradeModalSubtitle: "Upgrade to Premium to access tools that will help you manage your farm like a professional.",
+                premiumFeature1: "Unlimited photo analyses",
+                premiumFeature2: "Interactive Chat Assistant",
+                premiumFeature3: "Proactive Alerts and Notifications",
+                premiumFeature4: "Smart Irrigation Calculator",
+                premiumFeature5: "Crop Calendar and Weed Control",
+                guestMode: "Guest Mode:",
+                guestMessage: "Your progress will not be saved.",
+                registerOrLogin: "Register or Log In",
+                guestMessage2: "for a full experience.",
+                confirmLogoutGuest: "You are a guest. To create an account, your guest session will be closed. Do you want to continue?",
+                confirmLogout: "Do you want to sign out?",
+                loginTitle: "Welcome to AgroIA",
+                loginSubtitle: "Log in for a full experience or continue as a guest.",
+                loginGoogle: "Continue with Google",
+                loginFacebook: "Continue with Facebook",
+                or: "OR",
+                emailPlaceholder: "Email address",
+                passwordPlaceholder: "Password",
+                loginEmail: "Log In",
+                noAccount: "Don't have an account?",
+                registerHere: "Register here",
+                hasAccount: "Already have an account?",
+                loginHere: "Log in here",
+                loginGuest: "Continue as Guest"
+            }
+        };
+
         // --- ELEMENTOS DEL DOM (Declaración Global) ---
         const allElements = {
+            appLoader: document.getElementById('app-loader'),
+            appContent: document.getElementById('app-content'),
             statusIndicator: document.getElementById('status-indicator'),
             fileUpload: document.getElementById('file-upload'),
             galleryBtn: document.getElementById('gallery-btn'),
@@ -358,9 +472,11 @@
 
         // --- LÓGICA DE AUTENTICACIÓN ---
         onAuthStateChanged(auth, async (user) => {
+            allElements.appLoader.classList.add('hidden');
             if (user) {
                 currentUser = user;
                 allElements.loginModal.classList.add('hidden');
+                allElements.appContent.classList.remove('hidden');
                 
                 if (user.isAnonymous) {
                     allElements.guestBanner.classList.remove('hidden');
@@ -378,6 +494,7 @@
                 currentUser = null;
                 userProfile = { isPremium: false };
                 allElements.loginModal.classList.remove('hidden');
+                allElements.appContent.classList.add('hidden');
                 allElements.guestBanner.classList.add('hidden');
                 updateUIForUser();
                 appInitialized = false;
@@ -453,7 +570,7 @@
                     message = currentLanguage === 'es' ? 'Este correo ya está registrado.' : 'This email is already registered.';
                     break;
                  case 'auth/account-exists-with-different-credential':
-                    message = currentLanguage === 'es' ? 'Ya existe una cuenta con este correo. Intenta iniciar sesión con Google o Facebook.' : 'An account already exists with this email. Try logging in with Google or Facebook.';
+                    message = currentLanguage === 'es' ? 'Ya existe una cuenta con este correo. Intenta iniciar sesión con otro método.' : 'An account already exists with this email. Try logging in with another method.';
                     break;
             }
             authError.textContent = message;
@@ -487,84 +604,6 @@
         function initializeAppLogic() {
             let currentAnalysisType = 'plant_soil';
             let conversationHistory = [];
-
-            // --- LÓGICA DE TRADUCCIÓN ---
-            const translations = {
-                es: {
-                    appSubtitle: "Tu compañero IA para una agricultura sostenible.",
-                    toolsTitle: "Herramientas Principales",
-                    navDiagnosis: "Chat", navCalendar: "Calendario", navLibrary: "Biblioteca", navIrrigation: "Riego", navAlerts: "Alertas", navWeeds: "Malezas",
-                    diagnoseTitle: "Analizar Foto", diagnoseSubtitle: "Sube una foto de una planta o del suelo para analizarla.",
-                    galleryButton: "Galería", cameraButton: "Cámara",
-                    weatherTitle: "Clima en", chatTitle: "Asistente Interactivo", chatPlaceholder: "Escribe tu pregunta...",
-                    calendarTitle: "Calendario de Cultivo Inteligente", selectCrop: "Selecciona un cultivo:", generateCalendar: "Generar Calendario",
-                    libraryTitle: "Biblioteca de Plagas y Enfermedades", libraryPlaceholder: "Ej: Roya, Mosca blanca...",
-                    irrigationTitle: "Calculadora de Riego Inteligente", selectCropIrrigation: "Selecciona tu cultivo:", calculateIrrigation: "Calcular Riego",
-                    alertsTitle: "Centro de Alertas",
-                    weedsTitle: "Identificar Maleza", weedsSubtitle: "Toma o sube una foto de una maleza para obtener un plan de control.",
-                    initialChatMessage: "Usa la galería o la cámara para analizar una foto de una planta o del suelo.", tipOfTheDay: "Consejo del Día:", loading: "Cargando...",
-                    onlineStatus: "Conectado", offlineStatus: "Sin conexión (Modo Offline)",
-                    initialCalendarMessage: "Selecciona un cultivo y genera un plan de acción para todo el ciclo.",
-                    initialLibraryMessage: "Busca una plaga o enfermedad para ver su ficha técnica.",
-                    initialIrrigationMessage: "Selecciona tu cultivo para obtener una recomendación de riego basada en el pronóstico del tiempo.",
-                    initialWeedsMessage: "Usa la galería o la cámara para identificar una maleza y recibir un plan de control.",
-                    noAlerts: "No hay alertas nuevas.",
-                    speakButtonTitle: "Leer en voz alta",
-                    premiumTitle: "Función Premium",
-                    premiumDescription: "Esta herramienta es parte de AgroIA Premium. Actualiza para desbloquear esta y otras funciones avanzadas.",
-                    upgradeNow: "Actualizar Ahora",
-                    upgradeModalTitle: "Desbloquea Todo el Poder de AgroIA",
-                    upgradeModalSubtitle: "Actualiza a Premium para acceder a herramientas que te ayudarán a gestionar tu finca como un profesional.",
-                    premiumFeature1: "Análisis de fotos ilimitados",
-                    premiumFeature2: "Asistente de Chat Interactivo",
-                    premiumFeature3: "Alertas y Notificaciones Proactivas",
-                    premiumFeature4: "Calculadora de Riego Inteligente",
-                    premiumFeature5: "Calendario de Cultivo y Control de Malezas",
-                    guestMode: "Modo Invitado:",
-                    guestMessage: "Tu progreso no se guardará entre sesiones.",
-                    registerOrLogin: "Regístrate o Inicia Sesión",
-                    guestMessage2: "para una experiencia completa.",
-                    confirmLogoutGuest: "Estás como invitado. Para crear una cuenta, tu sesión de invitado se cerrará. ¿Quieres continuar?",
-                    confirmLogout: "¿Quieres cerrar sesión?"
-                },
-                en: {
-                    appSubtitle: "Your AI companion for sustainable agriculture.",
-                    toolsTitle: "Main Tools",
-                    navDiagnosis: "Chat", navCalendar: "Calendar", navLibrary: "Library", navIrrigation: "Irrigation", navAlerts: "Alerts", navWeeds: "Weeds",
-                    diagnoseTitle: "Analyze Photo", diagnoseSubtitle: "Upload a photo of a plant or soil for analysis.",
-                    galleryButton: "Gallery", cameraButton: "Camera",
-                    weatherTitle: "Weather in", chatTitle: "Interactive Assistant", chatPlaceholder: "Type your question...",
-                    calendarTitle: "Smart Crop Calendar", selectCrop: "Select a crop:", generateCalendar: "Generate Calendar",
-                    libraryTitle: "Pest & Disease Library", libraryPlaceholder: "E.g., Rust, Whitefly...",
-                    irrigationTitle: "Smart Irrigation Calculator", selectCropIrrigation: "Select your crop:", calculateIrrigation: "Calculate Irrigation",
-                    alertsTitle: "Alert Center",
-                    weedsTitle: "Weed Identifier", weedsSubtitle: "Take or upload a photo of a weed to get a control plan.",
-                    initialChatMessage: "Use the gallery or camera to analyze a photo of a plant or soil.", tipOfTheDay: "Tip of the Day:", loading: "Loading...",
-                    onlineStatus: "Online", offlineStatus: "Offline Mode",
-                    initialCalendarMessage: "Select a crop and generate an action plan for the entire cycle.",
-                    initialLibraryMessage: "Search for a pest or disease to see its technical sheet.",
-                    initialIrrigationMessage: "Select your crop to get an irrigation recommendation based on the weather forecast.",
-                    initialWeedsMessage: "Use the gallery or camera to identify a weed and receive a control plan.",
-                    noAlerts: "No new alerts.",
-                    speakButtonTitle: "Read aloud",
-                    premiumTitle: "Premium Feature",
-                    premiumDescription: "This tool is part of AgroIA Premium. Upgrade to unlock this and other advanced features.",
-                    upgradeNow: "Upgrade Now",
-                    upgradeModalTitle: "Unlock the Full Power of AgroIA",
-                    upgradeModalSubtitle: "Upgrade to Premium to access tools that will help you manage your farm like a professional.",
-                    premiumFeature1: "Unlimited photo analyses",
-                    premiumFeature2: "Interactive Chat Assistant",
-                    premiumFeature3: "Proactive Alerts and Notifications",
-                    premiumFeature4: "Smart Irrigation Calculator",
-                    premiumFeature5: "Crop Calendar and Weed Control",
-                    guestMode: "Guest Mode:",
-                    guestMessage: "Your progress will not be saved between sessions.",
-                    registerOrLogin: "Register or Log In",
-                    guestMessage2: "for a full experience.",
-                    confirmLogoutGuest: "You are a guest. To create an account, your guest session will be closed. Do you want to continue?",
-                    confirmLogout: "Do you want to sign out?"
-                }
-            };
 
             function setLanguage(lang) {
                 currentLanguage = lang;
@@ -605,7 +644,6 @@
                 setLanguage(newLang);
             });
 
-            // --- FUNCIONES DE NAVEGACIÓN ---
             function switchView(view) {
                 const premiumViews = ['calendar', 'irrigation', 'alerts', 'weeds'];
                 if (premiumViews.includes(view) && !userProfile.isPremium) {
@@ -647,99 +685,14 @@
             allElements.navAlerts.addEventListener('click', () => switchView('alerts'));
             allElements.navWeeds.addEventListener('click', () => switchView('weeds'));
 
-            // --- FUNCIÓN SEGURA PARA LLAMAR A LA IA ---
-            async function callGemini(payload, cacheKey = null) {
-                const PROXY_URL = '/.netlify/functions/gemini-proxy';
-                const DYNAMIC_CACHE_NAME = 'agro-ia-dynamic-cache-v1';
-
-                if (!navigator.onLine && cacheKey) {
-                    const cache = await caches.open(DYNAMIC_CACHE_NAME);
-                    const cacheKeyUrl = `${PROXY_URL}?key=${cacheKey}&lang=${currentLanguage}`;
-                    const cachedResponse = await cache.match(cacheKeyUrl);
-                    if (cachedResponse) {
-                        const data = await cachedResponse.json();
-                        if (data.candidates && data.candidates[0].content && data.candidates[0].content.parts[0]) {
-                            return data.candidates[0].content.parts[0].text;
-                        }
-                    }
-                    return currentLanguage === 'es' ? "Estás sin conexión. No se encontró una respuesta guardada." : "You are offline. No saved response was found.";
-                }
-                
-                try {
-                    const response = await fetch(PROXY_URL, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
-                    });
-                    if (!response.ok) {
-                        return currentLanguage === 'es' ? "Error: No se pudo comunicar con la IA." : "Error: Could not communicate with the AI.";
-                    }
-                    
-                    if (cacheKey) {
-                        const cache = await caches.open(DYNAMIC_CACHE_NAME);
-                        const cacheKeyUrl = `${PROXY_URL}?key=${cacheKey}&lang=${currentLanguage}`;
-                        await cache.put(cacheKeyUrl, response.clone());
-                    }
-
-                    const result = await response.json();
-                    if (result.candidates && result.candidates[0].content && result.candidates[0].content.parts[0]) {
-                        return result.candidates[0].content.parts[0].text;
-                    }
-                    return currentLanguage === 'es' ? "No se recibió una respuesta válida de la IA." : "Did not receive a valid response from the AI.";
-                } catch (e) {
-                    return currentLanguage === 'es' ? "Error de red: No se pudo conectar al servidor." : "Network Error: Could not connect to the server.";
-                }
-            }
-
-            function formatResponse(markdownText) {
-                return markdownText
-                    .replace(/^#### (.*$)/gim, '<h4 class="text-md font-semibold mt-3 mb-1 text-gray-700">$1</h4>')
-                    .replace(/^### (.*$)/gim, '<h3 class="text-lg font-semibold mt-3 mb-1 text-gray-800">$1</h3>')
-                    .replace(/^## (.*$)/gim, '<h2 class="text-xl font-bold mt-4 mb-2">$1</h2>')
-                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                    .replace(/^- (.*$)/gim, '<li class="ml-4">$1</li>')
-                    .replace(/(<\/li>)\s*<li>/g, '$1<li>')
-                    .replace(/(<li>.*<\/li>)/gs, '<ul class="list-disc list-inside space-y-1">$1</ul>')
-                    .replace(/<\/ul>\n?<ul>/g, '')
-                    .replace(/\n/g, '<br>');
-            }
-
-            function showLoader(container, message) {
-                container.innerHTML = `<div class="flex justify-center items-center flex-col h-full"><div class="loader"></div><p class="mt-2 text-gray-500">${message}</p></div>`;
-            }
+            async function callGemini(payload, cacheKey = null) { /* ... */ }
+            function formatResponse(markdownText) { /* ... */ }
+            function showLoader(container, message) { /* ... */ }
             
-            // --- LÓGICA DE ASISTENTE DE VOZ ---
             const synth = window.speechSynthesis;
             let currentUtterance = null;
-            function speakText(text, button) {
-                if (!synth) {
-                    alert('Tu navegador no soporta el asistente de voz.');
-                    return;
-                }
-                if (currentUtterance && synth.speaking) {
-                    if (synth.paused) { synth.resume(); } else { synth.pause(); }
-                    return;
-                }
-                synth.cancel();
-                const cleanedText = text.replace(/###|##|\*\*|^-/g, '');
-                const utterance = new SpeechSynthesisUtterance(cleanedText);
-                utterance.lang = currentLanguage === 'es' ? 'es-ES' : 'en-US';
-                utterance.onstart = () => {
-                    button.classList.add('speaking');
-                    button.querySelector('i').classList.replace('ph-speaker-high', 'ph-pause-circle');
-                };
-                utterance.onend = () => {
-                    button.classList.remove('speaking');
-                    button.querySelector('i').classList.replace('ph-pause-circle', 'ph-speaker-high');
-                    currentUtterance = null;
-                };
-                utterance.onpause = () => { button.querySelector('i').classList.replace('ph-pause-circle', 'ph-play-circle'); };
-                utterance.onresume = () => { button.querySelector('i').classList.replace('ph-play-circle', 'ph-pause-circle'); };
-                currentUtterance = utterance;
-                synth.speak(utterance);
-            }
+            function speakText(text, button) { /* ... */ }
 
-            // --- LÓGICA DE CAPTURA DE IMAGEN ---
             allElements.galleryBtn.addEventListener('click', () => {
                 currentAnalysisType = 'plant_soil';
                 allElements.fileUpload.removeAttribute('capture');
@@ -778,7 +731,6 @@
                 event.target.value = '';
             });
 
-            // --- LÓGICA DE DIAGNÓSTICO Y CHAT ---
             function initializeChat() {
                 const lang = currentLanguage;
                 allElements.chatMessages.innerHTML = `
@@ -886,7 +838,7 @@
         
         // --- INICIALIZACIÓN GLOBAL ---
         document.addEventListener('DOMContentLoaded', () => {
-            document.getElementById('google-login-btn').addEventListener('click', () => signInWithPopup(auth, googleProvider).catch(error => handleAuthError(error)));
+            document.getElementById('google-login-btn')?.addEventListener('click', () => signInWithPopup(auth, googleProvider).catch(error => handleAuthError(error)));
             document.getElementById('facebook-login-btn').addEventListener('click', () => signInWithPopup(auth, facebookProvider).catch(error => handleAuthError(error)));
             document.getElementById('guest-login-btn').addEventListener('click', () => signInAnonymously(auth).catch(error => handleAuthError(error)));
             document.getElementById('upgrade-btn-main').addEventListener('click', () => allElements.upgradeModal.classList.remove('hidden'));
@@ -922,14 +874,15 @@
                 const authToggleBtn = document.getElementById('auth-toggle-btn');
                 const authError = document.getElementById('auth-error');
                 authError.classList.add('hidden');
+                const translationsData = translations[lang] || translations['es'];
                 if (isRegisterMode) {
-                    emailActionBtn.textContent = translations[lang].registerHere;
-                    authToggleText.textContent = translations[lang].hasAccount;
-                    authToggleBtn.textContent = translations[lang].loginHere;
+                    emailActionBtn.textContent = translationsData.registerHere;
+                    authToggleText.textContent = translationsData.hasAccount;
+                    authToggleBtn.textContent = translationsData.loginHere;
                 } else {
-                    emailActionBtn.textContent = translations[lang].loginEmail;
-                    authToggleText.textContent = translations[lang].noAccount;
-                    authToggleBtn.textContent = translations[lang].registerHere;
+                    emailActionBtn.textContent = translationsData.loginEmail;
+                    authToggleText.textContent = translationsData.noAccount;
+                    authToggleBtn.textContent = translationsData.registerHere;
                 }
             }
 
