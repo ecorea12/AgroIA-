@@ -271,7 +271,6 @@
         import { getFirestore, doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
         // Your web app's Firebase configuration
-        // PEGA AQUÍ LA CONFIGURACIÓN DE TU PROYECTO DE FIREBASE
         const firebaseConfig = {
             apiKey: "AIzaSyDLHLRq57um95etYMfdw4eLfybCrfsZJe0",
             authDomain: "agroia-e2e25.firebaseapp.com",
@@ -318,7 +317,7 @@
                 userProfile = { isPremium: false };
                 loginModal.classList.remove('hidden');
                 updateUIForUser();
-                appInitialized = false; // Reset app state on logout
+                appInitialized = false;
             }
         });
 
@@ -366,10 +365,13 @@
                     lockIcon.remove();
                 }
             });
-            chatForm.classList.toggle('hidden', !userProfile.isPremium);
+            if (chatForm) {
+                 chatForm.classList.toggle('hidden', !userProfile.isPremium);
+            }
         }
 
         function handleAuthError(error) {
+            const authError = document.getElementById('auth-error');
             console.error("Auth Error:", error.code, error.message);
             let message = "Ocurrió un error. Inténtalo de nuevo.";
             if (currentLanguage === 'en') {
@@ -417,21 +419,122 @@
             await setDoc(usageRef, usageData, { merge: true });
             updateUIForUser();
         }
-
+        
         // --- INICIALIZACIÓN DE LA APP ---
         function initializeAppLogic() {
-            // El resto del código de la aplicación va aquí
-            const allElements = {
-                // ... (definir todos los elementos del DOM aquí para que no se repitan)
-            };
+            // --- Elementos del DOM (dentro de la inicialización) ---
+            const statusIndicator = document.getElementById('status-indicator');
+            const fileUpload = document.getElementById('file-upload');
+            const galleryBtn = document.getElementById('gallery-btn');
+            const cameraBtn = document.getElementById('camera-btn');
+            const galleryWeedsBtn = document.getElementById('gallery-weeds-btn');
+            const cameraWeedsBtn = document.getElementById('camera-weeds-btn');
+            const weatherInfo = document.getElementById('weather-info');
+            const locationName = document.getElementById('location-name');
+            const langSwitcher = document.getElementById('lang-switcher');
+            const langFlag = document.getElementById('lang-flag');
+            const alertBadge = document.getElementById('alert-badge');
+            const chatMessages = document.getElementById('chat-messages');
+            const chatForm = document.getElementById('chat-form');
+            const chatInput = document.getElementById('chat-input');
+            const cropSelectCalendar = document.getElementById('crop-select-calendar');
+            const generateCalendarBtn = document.getElementById('generate-calendar-btn');
+            const calendarResultsContainer = document.getElementById('calendar-results-container');
+            const librarySearchInput = document.getElementById('library-search-input');
+            const librarySearchBtn = document.getElementById('library-search-btn');
+            const libraryResultsContainer = document.getElementById('library-results-container');
+            const cropSelectIrrigation = document.getElementById('crop-select-irrigation');
+            const calculateIrrigationBtn = document.getElementById('calculate-irrigation-btn');
+            const irrigationResultsContainer = document.getElementById('irrigation-results-container');
+            const alertsContainer = document.getElementById('alerts-container');
+            const weedsResultsContainer = document.getElementById('weeds-results-container');
+            const navDiagnosis = document.getElementById('nav-diagnosis');
+            const navCalendar = document.getElementById('nav-calendar');
+            const navLibrary = document.getElementById('nav-library');
+            const navIrrigation = document.getElementById('nav-irrigation');
+            const navAlerts = document.getElementById('nav-alerts');
+            const navWeeds = document.getElementById('nav-weeds');
+            const viewDiagnosis = document.getElementById('view-diagnosis');
+            const viewCalendar = document.getElementById('view-calendar');
+            const viewLibrary = document.getElementById('view-library');
+            const viewIrrigation = document.getElementById('view-irrigation');
+            const viewAlerts = document.getElementById('view-alerts');
+            const viewWeeds = document.getElementById('view-weeds');
+            const controlsDiagnosis = document.getElementById('controls-diagnosis');
+            const controlsWeeds = document.getElementById('controls-weeds');
+            
+            let currentAnalysisType = 'plant_soil';
 
             // --- LÓGICA DE TRADUCCIÓN ---
-            const translations = { /* ... */ };
-            function setLanguage(lang) { /* ... */ }
-            langSwitcher.addEventListener('click', () => { /* ... */ });
+            function setLanguage(lang) {
+                currentLanguage = lang;
+                localStorage.setItem('agroia-lang', lang);
+                document.documentElement.lang = lang;
+                
+                if (lang === 'es') {
+                    langFlag.src = 'https://flagcdn.com/us.svg';
+                    langFlag.alt = 'Switch to English';
+                    langSwitcher.title = 'Switch to English';
+                } else {
+                    langFlag.src = 'https://flagcdn.com/es.svg';
+                    langFlag.alt = 'Cambiar a Español';
+                    langSwitcher.title = 'Cambiar a Español';
+                }
+
+                document.querySelectorAll('[data-translate]').forEach(el => {
+                    const key = el.dataset.translate;
+                    if (translations[lang][key]) {
+                        el.textContent = translations[lang][key];
+                    }
+                });
+                document.querySelectorAll('[data-translate-placeholder]').forEach(el => {
+                    const key = el.dataset.translatePlaceholder;
+                    if (translations[lang][key]) {
+                        el.placeholder = translations[lang][key];
+                    }
+                });
+                initializeChat();
+                calendarResultsContainer.innerHTML = `<p class="text-gray-500 text-center mt-8">${translations[lang].initialCalendarMessage}</p>`;
+                libraryResultsContainer.innerHTML = `<p class="text-gray-500 text-center mt-8">${translations[lang].initialLibraryMessage}</p>`;
+                irrigationResultsContainer.innerHTML = `<p class="text-gray-500 text-center mt-8">${translations[lang].initialIrrigationMessage}</p>`;
+                weedsResultsContainer.innerHTML = `<p class="text-gray-500 text-center mt-8">${translations[lang].initialWeedsMessage}</p>`;
+                displayAlerts();
+            }
+            langSwitcher.addEventListener('click', () => {
+                const newLang = currentLanguage === 'es' ? 'en' : 'es';
+                setLanguage(newLang);
+            });
 
             // --- FUNCIONES DE NAVEGACIÓN ---
-            function switchView(view) { /* ... */ }
+            function switchView(view) {
+                const premiumViews = ['calendar', 'irrigation', 'alerts', 'weeds'];
+                if (premiumViews.includes(view) && !userProfile.isPremium) {
+                    document.getElementById('view-premium-locked').classList.remove('hidden');
+                    // Ocultar todas las vistas principales
+                    viewDiagnosis.classList.add('hidden');
+                    viewCalendar.classList.add('hidden');
+                    viewLibrary.classList.add('hidden');
+                    viewIrrigation.classList.add('hidden');
+                    viewAlerts.classList.add('hidden');
+                    viewWeeds.classList.add('hidden');
+                    return;
+                }
+                
+                const views = { diagnosis: viewDiagnosis, calendar: viewCalendar, library: viewLibrary, irrigation: viewIrrigation, alerts: viewAlerts, weeds: viewWeeds };
+                const navs = { diagnosis: navDiagnosis, calendar: navCalendar, library: navLibrary, irrigation: navIrrigation, alerts: navAlerts, weeds: navWeeds };
+                
+                document.getElementById('view-premium-locked').classList.add('hidden');
+                for (const key in views) {
+                    if(views[key]) views[key].classList.toggle('hidden', key !== view);
+                    if(navs[key]) navs[key].classList.toggle('active', key === view);
+                }
+                controlsDiagnosis.classList.toggle('hidden', view !== 'diagnosis');
+                controlsWeeds.classList.toggle('hidden', view !== 'weeds');
+                
+                if(view === 'alerts') {
+                    alertBadge.classList.add('hidden');
+                }
+            }
             navDiagnosis.addEventListener('click', () => switchView('diagnosis'));
             navCalendar.addEventListener('click', () => switchView('calendar'));
             navLibrary.addEventListener('click', () => switchView('library'));
@@ -440,31 +543,220 @@
             navWeeds.addEventListener('click', () => switchView('weeds'));
 
             // --- FUNCIÓN SEGURA PARA LLAMAR A LA IA ---
-            async function callGemini(payload, cacheKey = null) { /* ... */ }
-            function formatResponse(markdownText) { /* ... */ }
-            function showLoader(container, message) { /* ... */ }
+            async function callGemini(payload, cacheKey = null) {
+                const PROXY_URL = '/.netlify/functions/gemini-proxy';
+                const DYNAMIC_CACHE_NAME = 'agro-ia-dynamic-cache-v1';
+
+                if (!navigator.onLine && cacheKey) {
+                    const cache = await caches.open(DYNAMIC_CACHE_NAME);
+                    const cacheKeyUrl = `${PROXY_URL}?key=${cacheKey}&lang=${currentLanguage}`;
+                    const cachedResponse = await cache.match(cacheKeyUrl);
+                    if (cachedResponse) {
+                        const data = await cachedResponse.json();
+                        if (data.candidates && data.candidates[0].content && data.candidates[0].content.parts[0]) {
+                            return data.candidates[0].content.parts[0].text;
+                        }
+                    }
+                    return currentLanguage === 'es' ? "Estás sin conexión. No se encontró una respuesta guardada." : "You are offline. No saved response was found.";
+                }
+                
+                try {
+                    const response = await fetch(PROXY_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    if (!response.ok) {
+                        return currentLanguage === 'es' ? "Error: No se pudo comunicar con la IA." : "Error: Could not communicate with the AI.";
+                    }
+                    
+                    if (cacheKey) {
+                        const cache = await caches.open(DYNAMIC_CACHE_NAME);
+                        const cacheKeyUrl = `${PROXY_URL}?key=${cacheKey}&lang=${currentLanguage}`;
+                        await cache.put(cacheKeyUrl, response.clone());
+                    }
+
+                    const result = await response.json();
+                    if (result.candidates && result.candidates[0].content && result.candidates[0].content.parts[0]) {
+                        return result.candidates[0].content.parts[0].text;
+                    }
+                    return currentLanguage === 'es' ? "No se recibió una respuesta válida de la IA." : "Did not receive a valid response from the AI.";
+                } catch (e) {
+                    return currentLanguage === 'es' ? "Error de red: No se pudo conectar al servidor." : "Network Error: Could not connect to the server.";
+                }
+            }
+
+            function formatResponse(markdownText) {
+                return markdownText
+                    .replace(/^#### (.*$)/gim, '<h4 class="text-md font-semibold mt-3 mb-1 text-gray-700">$1</h4>')
+                    .replace(/^### (.*$)/gim, '<h3 class="text-lg font-semibold mt-3 mb-1 text-gray-800">$1</h3>')
+                    .replace(/^## (.*$)/gim, '<h2 class="text-xl font-bold mt-4 mb-2">$1</h2>')
+                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                    .replace(/^- (.*$)/gim, '<li class="ml-4">$1</li>')
+                    .replace(/(<\/li>)\s*<li>/g, '$1<li>')
+                    .replace(/(<li>.*<\/li>)/gs, '<ul class="list-disc list-inside space-y-1">$1</ul>')
+                    .replace(/<\/ul>\n?<ul>/g, '')
+                    .replace(/\n/g, '<br>');
+            }
+
+            function showLoader(container, message) {
+                container.innerHTML = `<div class="flex justify-center items-center flex-col h-full"><div class="loader"></div><p class="mt-2 text-gray-500">${message}</p></div>`;
+            }
             
             // --- LÓGICA DE ASISTENTE DE VOZ ---
             const synth = window.speechSynthesis;
             let currentUtterance = null;
-            function speakText(text, button) { /* ... */ }
+            function speakText(text, button) {
+                if (!synth) {
+                    alert('Tu navegador no soporta el asistente de voz.');
+                    return;
+                }
+                if (currentUtterance && synth.speaking) {
+                    if (synth.paused) { synth.resume(); } else { synth.pause(); }
+                    return;
+                }
+                synth.cancel();
+                const cleanedText = text.replace(/###|##|\*\*|^-/g, '');
+                const utterance = new SpeechSynthesisUtterance(cleanedText);
+                utterance.lang = currentLanguage === 'es' ? 'es-ES' : 'en-US';
+                utterance.onstart = () => {
+                    button.classList.add('speaking');
+                    button.querySelector('i').classList.replace('ph-speaker-high', 'ph-pause-circle');
+                };
+                utterance.onend = () => {
+                    button.classList.remove('speaking');
+                    button.querySelector('i').classList.replace('ph-pause-circle', 'ph-speaker-high');
+                    currentUtterance = null;
+                };
+                utterance.onpause = () => { button.querySelector('i').classList.replace('ph-pause-circle', 'ph-play-circle'); };
+                utterance.onresume = () => { button.querySelector('i').classList.replace('ph-play-circle', 'ph-pause-circle'); };
+                currentUtterance = utterance;
+                synth.speak(utterance);
+            }
 
             // --- LÓGICA DE CAPTURA DE IMAGEN ---
-            galleryBtn.addEventListener('click', () => { /* ... */ });
-            cameraBtn.addEventListener('click', () => { /* ... */ });
-            galleryWeedsBtn.addEventListener('click', () => { /* ... */ });
-            cameraWeedsBtn.addEventListener('click', () => { /* ... */ });
-            fileUpload.addEventListener('change', (event) => { /* ... */ });
+            galleryBtn.addEventListener('click', () => {
+                currentAnalysisType = 'plant_soil';
+                fileUpload.removeAttribute('capture');
+                fileUpload.click();
+            });
+            cameraBtn.addEventListener('click', () => {
+                currentAnalysisType = 'plant_soil';
+                fileUpload.setAttribute('capture', 'environment');
+                fileUpload.click();
+            });
+            galleryWeedsBtn.addEventListener('click', () => {
+                currentAnalysisType = 'weed';
+                fileUpload.removeAttribute('capture');
+                fileUpload.click();
+            });
+            cameraWeedsBtn.addEventListener('click', () => {
+                currentAnalysisType = 'weed';
+                fileUpload.setAttribute('capture', 'environment');
+                fileUpload.click();
+            });
+            fileUpload.addEventListener('change', (event) => {
+                const file = event.target.files[0];
+                if (!file) return;
+                
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    if (currentAnalysisType === 'plant_soil') {
+                        switchView('diagnosis');
+                        analyzeImage(e.target.result);
+                    } else if (currentAnalysisType === 'weed') {
+                        switchView('weeds');
+                        analyzeWeed(e.target.result);
+                    }
+                };
+                reader.readAsDataURL(file);
+                event.target.value = '';
+            });
 
             // --- LÓGICA DE DIAGNÓSTICO Y CHAT ---
-            function initializeChat() { /* ... */ }
-            async function analyzeImage(base64ImageData) { /* ... */ }
-            chatForm.addEventListener('submit', async (e) => { /* ... */ });
-            function appendChatMessage(text, sender) { /* ... */ }
+            function initializeChat() {
+                const lang = currentLanguage;
+                chatMessages.innerHTML = `
+                    <div class="m-auto text-center">
+                        <p class="text-gray-500" data-translate="initialChatMessage">${translations[lang].initialChatMessage}</p>
+                        <div class="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg text-sm">
+                            <p class="font-semibold text-green-800" data-translate="tipOfTheDay">${translations[lang].tipOfTheDay}</p>
+                            <p class="text-green-700" id="tip-of-the-day-chat">${translations[lang].loading}</p>
+                        </div>
+                    </div>`;
+                fetchTipOfTheDay();
+            }
+
+            async function analyzeImage(base64ImageData) {
+                const canAnalyze = await checkUsageLimit();
+                if (!canAnalyze) {
+                    initializeChat();
+                    return;
+                }
+                showLoader(chatMessages, "La IA está analizando...");
+                chatForm.classList.add('hidden');
+                const langInstruction = `Respond in ${currentLanguage === 'es' ? 'Spanish' : 'English'}.`;
+                const initialPrompt = `You are an expert agronomy and soil science assistant. First, determine if the image is primarily of a plant (leaf, stem, fruit) or of soil. IF THE IMAGE IS OF A PLANT: 1. Identification: Identify the plant species. 2. Visual Diagnosis: Diagnose any possible disease, pest, or deficiency. 3. Action Plan: Provide a clear, organic, and low-cost action plan. IF THE IMAGE IS OF SOIL: 1. Soil Type Analysis: Based on color and texture, estimate the soil type. 2. Nutrient & pH Estimation: Based on visual cues, provide an estimated pH range and assess potential nutrient levels. 3. Recommendations: Provide clear, actionable steps to improve the soil. ${langInstruction} At the end, invite the user to ask more questions.`;
+                conversationHistory = [{ role: "user", parts: [{ text: initialPrompt }, { inlineData: { mimeType: "image/jpeg", data: base64ImageData.split(',')[1] } }] }];
+                const payload = { contents: conversationHistory };
+                const analysisText = await callGemini(payload, 'last-diagnosis');
+                await incrementUsage();
+                chatMessages.innerHTML = '';
+                conversationHistory.push({ role: "model", parts: [{ text: analysisText }] });
+                appendChatMessage(analysisText, 'assistant');
+                if (userProfile.isPremium) {
+                    chatForm.classList.remove('hidden');
+                }
+            }
+
+            chatForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const userMessage = chatInput.value.trim();
+                if (!userMessage || !navigator.onLine) return;
+                appendChatMessage(userMessage, 'user');
+                chatInput.value = '';
+                chatInput.disabled = true;
+                conversationHistory.push({ role: "user", parts: [{ text: userMessage }] });
+                const payload = { contents: conversationHistory };
+                const typingLoader = document.createElement('div');
+                typingLoader.className = 'chat-message chat-assistant';
+                typingLoader.innerHTML = `<div class="loader" style="width:25px; height:25px; border-width:3px;"></div>`;
+                chatMessages.appendChild(typingLoader);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+                const aiResponse = await callGemini(payload);
+                typingLoader.remove();
+                conversationHistory.push({ role: "model", parts: [{ text: aiResponse }] });
+                appendChatMessage(aiResponse, 'assistant');
+                chatInput.disabled = false;
+                chatInput.focus();
+            });
+
+            function appendChatMessage(text, sender) {
+                const messageWrapper = document.createElement('div');
+                messageWrapper.className = `chat-message ${sender === 'user' ? 'chat-user' : 'chat-assistant'}`;
+                const contentDiv = document.createElement('div');
+                contentDiv.innerHTML = formatResponse(text);
+                messageWrapper.appendChild(contentDiv);
+                if (sender === 'assistant' && 'speechSynthesis' in window) {
+                    const speakBtn = document.createElement('button');
+                    speakBtn.className = 'speak-button';
+                    speakBtn.title = translations[currentLanguage].speakButtonTitle;
+                    speakBtn.innerHTML = '<i class="ph-speaker-high text-xl"></i>';
+                    speakBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        speakText(text, speakBtn);
+                    });
+                    messageWrapper.appendChild(speakBtn);
+                }
+                chatMessages.appendChild(messageWrapper);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
 
             // --- LÓGICA DEL CALENDARIO, BIBLIOTECA, RIEGO, MALEZAS, ALERTAS ---
             generateCalendarBtn.addEventListener('click', async () => { /* ... */ });
             librarySearchBtn.addEventListener('click', searchLibrary);
+            librarySearchInput.addEventListener('keyup', (event) => { if (event.key === 'Enter') searchLibrary(); });
+            async function searchLibrary() { /* ... */ }
             calculateIrrigationBtn.addEventListener('click', async () => { /* ... */ });
             async function analyzeWeed(base64ImageData) { /* ... */ }
             function generateAlerts() { /* ... */ }
@@ -489,12 +781,20 @@
         
         // --- INICIALIZACIÓN GLOBAL ---
         window.onload = () => {
-             // Configuración inicial de botones de login que no dependen del estado de la app
             document.getElementById('google-login-btn').addEventListener('click', () => signInWithPopup(auth, googleProvider).catch(error => handleAuthError(error)));
             document.getElementById('facebook-login-btn').addEventListener('click', () => signInWithPopup(auth, facebookProvider).catch(error => handleAuthError(error)));
             document.getElementById('guest-login-btn').addEventListener('click', () => signInAnonymously(auth).catch(error => handleAuthError(error)));
             document.getElementById('upgrade-btn-main').addEventListener('click', () => upgradeModal.classList.remove('hidden'));
             document.getElementById('close-upgrade-modal').addEventListener('click', () => upgradeModal.classList.add('hidden'));
+            userMenuBtn.addEventListener('click', () => {
+                if (currentUser) {
+                    if (confirm(currentLanguage === 'es' ? '¿Quieres cerrar sesión?' : 'Do you want to sign out?')) {
+                        signOut(auth);
+                    }
+                } else {
+                    loginModal.classList.remove('hidden');
+                }
+            });
 
             const emailForm = document.getElementById('email-form');
             const authToggleBtn = document.getElementById('auth-toggle-btn');
