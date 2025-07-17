@@ -89,6 +89,11 @@
                 </button>
             </div>
         </header>
+        
+        <!-- BANNER DE MODO INVITADO -->
+        <div id="guest-banner" class="hidden bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 text-sm mb-6 rounded-r-lg" role="alert">
+            <p><strong data-translate="guestMode">Modo Invitado:</strong> <span data-translate="guestMessage">Tu progreso no se guardará entre sesiones.</span> <button id="show-login-btn" class="font-bold underline hover:text-yellow-800" data-translate="registerOrLogin">Regístrate o Inicia Sesión</button> <span data-translate="guestMessage2">para una experiencia completa.</span></p>
+        </div>
 
         <main class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
@@ -294,58 +299,75 @@
         const DAILY_ANALYSIS_LIMIT = 3;
         let isRegisterMode = false;
         let appInitialized = false;
+        let currentLanguage = 'es';
+        let userLocation = { lat: 14.10, lon: -87.21, name: 'Tegucigalpa' };
+        let weatherForecast = null;
+        let alerts = [];
 
         // --- ELEMENTOS DEL DOM (Declaración Global) ---
-        const statusIndicator = document.getElementById('status-indicator');
-        const fileUpload = document.getElementById('file-upload');
-        const galleryBtn = document.getElementById('gallery-btn');
-        const cameraBtn = document.getElementById('camera-btn');
-        const galleryWeedsBtn = document.getElementById('gallery-weeds-btn');
-        const cameraWeedsBtn = document.getElementById('camera-weeds-btn');
-        const weatherInfo = document.getElementById('weather-info');
-        const locationName = document.getElementById('location-name');
-        const langSwitcher = document.getElementById('lang-switcher');
-        const langFlag = document.getElementById('lang-flag');
-        const alertBadge = document.getElementById('alert-badge');
-        const chatMessages = document.getElementById('chat-messages');
-        const chatForm = document.getElementById('chat-form');
-        const chatInput = document.getElementById('chat-input');
-        const cropSelectCalendar = document.getElementById('crop-select-calendar');
-        const generateCalendarBtn = document.getElementById('generate-calendar-btn');
-        const calendarResultsContainer = document.getElementById('calendar-results-container');
-        const librarySearchInput = document.getElementById('library-search-input');
-        const librarySearchBtn = document.getElementById('library-search-btn');
-        const libraryResultsContainer = document.getElementById('library-results-container');
-        const cropSelectIrrigation = document.getElementById('crop-select-irrigation');
-        const calculateIrrigationBtn = document.getElementById('calculate-irrigation-btn');
-        const irrigationResultsContainer = document.getElementById('irrigation-results-container');
-        const alertsContainer = document.getElementById('alerts-container');
-        const weedsResultsContainer = document.getElementById('weeds-results-container');
-        const navDiagnosis = document.getElementById('nav-diagnosis');
-        const navCalendar = document.getElementById('nav-calendar');
-        const navLibrary = document.getElementById('nav-library');
-        const navIrrigation = document.getElementById('nav-irrigation');
-        const navAlerts = document.getElementById('nav-alerts');
-        const navWeeds = document.getElementById('nav-weeds');
-        const viewDiagnosis = document.getElementById('view-diagnosis');
-        const viewCalendar = document.getElementById('view-calendar');
-        const viewLibrary = document.getElementById('view-library');
-        const viewIrrigation = document.getElementById('view-irrigation');
-        const viewAlerts = document.getElementById('view-alerts');
-        const viewWeeds = document.getElementById('view-weeds');
-        const controlsDiagnosis = document.getElementById('controls-diagnosis');
-        const controlsWeeds = document.getElementById('controls-weeds');
-        const loginModal = document.getElementById('login-modal');
-        const upgradeModal = document.getElementById('upgrade-modal');
-        const userMenuBtn = document.getElementById('user-menu-btn');
-        const userIcon = document.getElementById('user-icon');
-        const userAvatar = document.getElementById('user-avatar');
+        const allElements = {
+            statusIndicator: document.getElementById('status-indicator'),
+            fileUpload: document.getElementById('file-upload'),
+            galleryBtn: document.getElementById('gallery-btn'),
+            cameraBtn: document.getElementById('camera-btn'),
+            galleryWeedsBtn: document.getElementById('gallery-weeds-btn'),
+            cameraWeedsBtn: document.getElementById('camera-weeds-btn'),
+            weatherInfo: document.getElementById('weather-info'),
+            locationName: document.getElementById('location-name'),
+            langSwitcher: document.getElementById('lang-switcher'),
+            langFlag: document.getElementById('lang-flag'),
+            alertBadge: document.getElementById('alert-badge'),
+            chatMessages: document.getElementById('chat-messages'),
+            chatForm: document.getElementById('chat-form'),
+            chatInput: document.getElementById('chat-input'),
+            cropSelectCalendar: document.getElementById('crop-select-calendar'),
+            generateCalendarBtn: document.getElementById('generate-calendar-btn'),
+            calendarResultsContainer: document.getElementById('calendar-results-container'),
+            librarySearchInput: document.getElementById('library-search-input'),
+            librarySearchBtn: document.getElementById('library-search-btn'),
+            libraryResultsContainer: document.getElementById('library-results-container'),
+            cropSelectIrrigation: document.getElementById('crop-select-irrigation'),
+            calculateIrrigationBtn: document.getElementById('calculate-irrigation-btn'),
+            irrigationResultsContainer: document.getElementById('irrigation-results-container'),
+            alertsContainer: document.getElementById('alerts-container'),
+            weedsResultsContainer: document.getElementById('weeds-results-container'),
+            navDiagnosis: document.getElementById('nav-diagnosis'),
+            navCalendar: document.getElementById('nav-calendar'),
+            navLibrary: document.getElementById('nav-library'),
+            navIrrigation: document.getElementById('nav-irrigation'),
+            navAlerts: document.getElementById('nav-alerts'),
+            navWeeds: document.getElementById('nav-weeds'),
+            viewDiagnosis: document.getElementById('view-diagnosis'),
+            viewCalendar: document.getElementById('view-calendar'),
+            viewLibrary: document.getElementById('view-library'),
+            viewIrrigation: document.getElementById('view-irrigation'),
+            viewAlerts: document.getElementById('view-alerts'),
+            viewWeeds: document.getElementById('view-weeds'),
+            controlsDiagnosis: document.getElementById('controls-diagnosis'),
+            controlsWeeds: document.getElementById('controls-weeds'),
+            loginModal: document.getElementById('login-modal'),
+            upgradeModal: document.getElementById('upgrade-modal'),
+            userMenuBtn: document.getElementById('user-menu-btn'),
+            userIcon: document.getElementById('user-icon'),
+            userAvatar: document.getElementById('user-avatar'),
+            viewPremiumLocked: document.getElementById('view-premium-locked'),
+            guestBanner: document.getElementById('guest-banner'),
+            showLoginBtn: document.getElementById('show-login-btn')
+        };
+        
 
         // --- LÓGICA DE AUTENTICACIÓN ---
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 currentUser = user;
-                loginModal.classList.add('hidden');
+                allElements.loginModal.classList.add('hidden');
+                
+                if (user.isAnonymous) {
+                    allElements.guestBanner.classList.remove('hidden');
+                } else {
+                    allElements.guestBanner.classList.add('hidden');
+                }
+
                 await loadUserData();
                 updateUIForUser();
                 if (!appInitialized) {
@@ -355,7 +377,8 @@
             } else {
                 currentUser = null;
                 userProfile = { isPremium: false };
-                loginModal.classList.remove('hidden');
+                allElements.loginModal.classList.remove('hidden');
+                allElements.guestBanner.classList.add('hidden');
                 updateUIForUser();
                 appInitialized = false;
             }
@@ -385,17 +408,17 @@
         
         function updateUIForUser() {
             if (currentUser && !currentUser.isAnonymous) {
-                userAvatar.src = currentUser.photoURL || `https://ui-avatars.com/api/?name=${currentUser.displayName || currentUser.email}&background=random`;
-                userAvatar.classList.remove('hidden');
-                userIcon.classList.add('hidden');
+                allElements.userAvatar.src = currentUser.photoURL || `https://ui-avatars.com/api/?name=${currentUser.displayName || currentUser.email}&background=random`;
+                allElements.userAvatar.classList.remove('hidden');
+                allElements.userIcon.classList.add('hidden');
             } else {
-                userAvatar.classList.add('hidden');
-                userIcon.classList.remove('hidden');
+                allElements.userAvatar.classList.add('hidden');
+                allElements.userIcon.classList.remove('hidden');
             }
             const analysesLeft = userProfile.isPremium ? '∞' : Math.max(0, DAILY_ANALYSIS_LIMIT - usageData.analysesCount);
             document.getElementById('analyses-left-count').textContent = analysesLeft;
 
-            const premiumFeatures = [navAlerts, navCalendar, navIrrigation, navWeeds];
+            const premiumFeatures = [allElements.navAlerts, allElements.navCalendar, allElements.navIrrigation, allElements.navWeeds];
             premiumFeatures.forEach(btn => {
                 btn.classList.toggle('premium-locked', !userProfile.isPremium);
                 const lockIcon = btn.querySelector('.ph-lock-simple');
@@ -405,8 +428,8 @@
                     lockIcon.remove();
                 }
             });
-            if (chatForm) {
-                 chatForm.classList.toggle('hidden', !userProfile.isPremium);
+            if (allElements.chatForm) {
+                 allElements.chatForm.classList.toggle('hidden', !userProfile.isPremium);
             }
         }
 
@@ -445,7 +468,7 @@
                 usageData = { analysesCount: 0, lastAnalysisDate: today };
             }
             if (usageData.analysesCount >= DAILY_ANALYSIS_LIMIT) {
-                document.getElementById('upgrade-modal').classList.remove('hidden');
+                allElements.upgradeModal.classList.remove('hidden');
                 return false;
             }
             return true;
@@ -463,6 +486,7 @@
         // --- INICIALIZACIÓN DE LA APP (SE LLAMA DESPUÉS DEL LOGIN) ---
         function initializeAppLogic() {
             let currentAnalysisType = 'plant_soil';
+            let conversationHistory = [];
 
             // --- LÓGICA DE TRADUCCIÓN ---
             const translations = {
@@ -485,7 +509,23 @@
                     initialIrrigationMessage: "Selecciona tu cultivo para obtener una recomendación de riego basada en el pronóstico del tiempo.",
                     initialWeedsMessage: "Usa la galería o la cámara para identificar una maleza y recibir un plan de control.",
                     noAlerts: "No hay alertas nuevas.",
-                    speakButtonTitle: "Leer en voz alta"
+                    speakButtonTitle: "Leer en voz alta",
+                    premiumTitle: "Función Premium",
+                    premiumDescription: "Esta herramienta es parte de AgroIA Premium. Actualiza para desbloquear esta y otras funciones avanzadas.",
+                    upgradeNow: "Actualizar Ahora",
+                    upgradeModalTitle: "Desbloquea Todo el Poder de AgroIA",
+                    upgradeModalSubtitle: "Actualiza a Premium para acceder a herramientas que te ayudarán a gestionar tu finca como un profesional.",
+                    premiumFeature1: "Análisis de fotos ilimitados",
+                    premiumFeature2: "Asistente de Chat Interactivo",
+                    premiumFeature3: "Alertas y Notificaciones Proactivas",
+                    premiumFeature4: "Calculadora de Riego Inteligente",
+                    premiumFeature5: "Calendario de Cultivo y Control de Malezas",
+                    guestMode: "Modo Invitado:",
+                    guestMessage: "Tu progreso no se guardará entre sesiones.",
+                    registerOrLogin: "Regístrate o Inicia Sesión",
+                    guestMessage2: "para una experiencia completa.",
+                    confirmLogoutGuest: "Estás como invitado. Para crear una cuenta, tu sesión de invitado se cerrará. ¿Quieres continuar?",
+                    confirmLogout: "¿Quieres cerrar sesión?"
                 },
                 en: {
                     appSubtitle: "Your AI companion for sustainable agriculture.",
@@ -506,7 +546,23 @@
                     initialIrrigationMessage: "Select your crop to get an irrigation recommendation based on the weather forecast.",
                     initialWeedsMessage: "Use the gallery or camera to identify a weed and receive a control plan.",
                     noAlerts: "No new alerts.",
-                    speakButtonTitle: "Read aloud"
+                    speakButtonTitle: "Read aloud",
+                    premiumTitle: "Premium Feature",
+                    premiumDescription: "This tool is part of AgroIA Premium. Upgrade to unlock this and other advanced features.",
+                    upgradeNow: "Upgrade Now",
+                    upgradeModalTitle: "Unlock the Full Power of AgroIA",
+                    upgradeModalSubtitle: "Upgrade to Premium to access tools that will help you manage your farm like a professional.",
+                    premiumFeature1: "Unlimited photo analyses",
+                    premiumFeature2: "Interactive Chat Assistant",
+                    premiumFeature3: "Proactive Alerts and Notifications",
+                    premiumFeature4: "Smart Irrigation Calculator",
+                    premiumFeature5: "Crop Calendar and Weed Control",
+                    guestMode: "Guest Mode:",
+                    guestMessage: "Your progress will not be saved between sessions.",
+                    registerOrLogin: "Register or Log In",
+                    guestMessage2: "for a full experience.",
+                    confirmLogoutGuest: "You are a guest. To create an account, your guest session will be closed. Do you want to continue?",
+                    confirmLogout: "Do you want to sign out?"
                 }
             };
 
@@ -516,13 +572,13 @@
                 document.documentElement.lang = lang;
                 
                 if (lang === 'es') {
-                    langFlag.src = 'https://flagcdn.com/us.svg';
-                    langFlag.alt = 'Switch to English';
-                    langSwitcher.title = 'Switch to English';
+                    allElements.langFlag.src = 'https://flagcdn.com/us.svg';
+                    allElements.langFlag.alt = 'Switch to English';
+                    allElements.langSwitcher.title = 'Switch to English';
                 } else {
-                    langFlag.src = 'https://flagcdn.com/es.svg';
-                    langFlag.alt = 'Cambiar a Español';
-                    langSwitcher.title = 'Cambiar a Español';
+                    allElements.langFlag.src = 'https://flagcdn.com/es.svg';
+                    allElements.langFlag.alt = 'Cambiar a Español';
+                    allElements.langSwitcher.title = 'Cambiar a Español';
                 }
 
                 document.querySelectorAll('[data-translate]').forEach(el => {
@@ -538,13 +594,13 @@
                     }
                 });
                 initializeChat();
-                calendarResultsContainer.innerHTML = `<p class="text-gray-500 text-center mt-8">${translations[lang].initialCalendarMessage}</p>`;
-                libraryResultsContainer.innerHTML = `<p class="text-gray-500 text-center mt-8">${translations[lang].initialLibraryMessage}</p>`;
-                irrigationResultsContainer.innerHTML = `<p class="text-gray-500 text-center mt-8">${translations[lang].initialIrrigationMessage}</p>`;
-                weedsResultsContainer.innerHTML = `<p class="text-gray-500 text-center mt-8">${translations[lang].initialWeedsMessage}</p>`;
+                allElements.calendarResultsContainer.innerHTML = `<p class="text-gray-500 text-center mt-8">${translations[lang].initialCalendarMessage}</p>`;
+                allElements.libraryResultsContainer.innerHTML = `<p class="text-gray-500 text-center mt-8">${translations[lang].initialLibraryMessage}</p>`;
+                allElements.irrigationResultsContainer.innerHTML = `<p class="text-gray-500 text-center mt-8">${translations[lang].initialIrrigationMessage}</p>`;
+                allElements.weedsResultsContainer.innerHTML = `<p class="text-gray-500 text-center mt-8">${translations[lang].initialWeedsMessage}</p>`;
                 displayAlerts();
             }
-            langSwitcher.addEventListener('click', () => {
+            allElements.langSwitcher.addEventListener('click', () => {
                 const newLang = currentLanguage === 'es' ? 'en' : 'es';
                 setLanguage(newLang);
             });
@@ -553,10 +609,9 @@
             function switchView(view) {
                 const premiumViews = ['calendar', 'irrigation', 'alerts', 'weeds'];
                 if (premiumViews.includes(view) && !userProfile.isPremium) {
-                    const viewPremiumLocked = document.getElementById('view-premium-locked');
-                    viewPremiumLocked.classList.remove('hidden');
+                    allElements.viewPremiumLocked.classList.remove('hidden');
                     // Ocultar todas las vistas principales
-                    viewDiagnosis.classList.add('hidden');
+                    allElements.viewDiagnosis.classList.add('hidden');
                     const calendarView = document.getElementById('view-calendar');
                     if(calendarView) calendarView.classList.add('hidden');
                     const libraryView = document.getElementById('view-library');
@@ -570,27 +625,27 @@
                     return;
                 }
                 
-                const views = { diagnosis: viewDiagnosis, calendar: document.getElementById('view-calendar'), library: document.getElementById('view-library'), irrigation: document.getElementById('view-irrigation'), alerts: document.getElementById('view-alerts'), weeds: document.getElementById('view-weeds') };
-                const navs = { diagnosis: navDiagnosis, calendar: navCalendar, library: navLibrary, irrigation: navIrrigation, alerts: navAlerts, weeds: navWeeds };
+                const views = { diagnosis: allElements.viewDiagnosis, calendar: document.getElementById('view-calendar'), library: document.getElementById('view-library'), irrigation: document.getElementById('view-irrigation'), alerts: document.getElementById('view-alerts'), weeds: document.getElementById('view-weeds') };
+                const navs = { diagnosis: allElements.navDiagnosis, calendar: allElements.navCalendar, library: allElements.navLibrary, irrigation: allElements.navIrrigation, alerts: allElements.navAlerts, weeds: allElements.navWeeds };
                 
-                document.getElementById('view-premium-locked').classList.add('hidden');
+                allElements.viewPremiumLocked.classList.add('hidden');
                 for (const key in views) {
                     if(views[key]) views[key].classList.toggle('hidden', key !== view);
                     if(navs[key]) navs[key].classList.toggle('active', key === view);
                 }
-                controlsDiagnosis.classList.toggle('hidden', view !== 'diagnosis');
-                controlsWeeds.classList.toggle('hidden', view !== 'weeds');
+                allElements.controlsDiagnosis.classList.toggle('hidden', view !== 'diagnosis');
+                allElements.controlsWeeds.classList.toggle('hidden', view !== 'weeds');
                 
                 if(view === 'alerts') {
-                    alertBadge.classList.add('hidden');
+                    allElements.alertBadge.classList.add('hidden');
                 }
             }
-            navDiagnosis.addEventListener('click', () => switchView('diagnosis'));
-            navCalendar.addEventListener('click', () => switchView('calendar'));
-            navLibrary.addEventListener('click', () => switchView('library'));
-            navIrrigation.addEventListener('click', () => switchView('irrigation'));
-            navAlerts.addEventListener('click', () => switchView('alerts'));
-            navWeeds.addEventListener('click', () => switchView('weeds'));
+            allElements.navDiagnosis.addEventListener('click', () => switchView('diagnosis'));
+            allElements.navCalendar.addEventListener('click', () => switchView('calendar'));
+            allElements.navLibrary.addEventListener('click', () => switchView('library'));
+            allElements.navIrrigation.addEventListener('click', () => switchView('irrigation'));
+            allElements.navAlerts.addEventListener('click', () => switchView('alerts'));
+            allElements.navWeeds.addEventListener('click', () => switchView('weeds'));
 
             // --- FUNCIÓN SEGURA PARA LLAMAR A LA IA ---
             async function callGemini(payload, cacheKey = null) {
@@ -685,27 +740,27 @@
             }
 
             // --- LÓGICA DE CAPTURA DE IMAGEN ---
-            galleryBtn.addEventListener('click', () => {
+            allElements.galleryBtn.addEventListener('click', () => {
                 currentAnalysisType = 'plant_soil';
-                fileUpload.removeAttribute('capture');
-                fileUpload.click();
+                allElements.fileUpload.removeAttribute('capture');
+                allElements.fileUpload.click();
             });
-            cameraBtn.addEventListener('click', () => {
+            allElements.cameraBtn.addEventListener('click', () => {
                 currentAnalysisType = 'plant_soil';
-                fileUpload.setAttribute('capture', 'environment');
-                fileUpload.click();
+                allElements.fileUpload.setAttribute('capture', 'environment');
+                allElements.fileUpload.click();
             });
-            galleryWeedsBtn.addEventListener('click', () => {
+            allElements.galleryWeedsBtn.addEventListener('click', () => {
                 currentAnalysisType = 'weed';
-                fileUpload.removeAttribute('capture');
-                fileUpload.click();
+                allElements.fileUpload.removeAttribute('capture');
+                allElements.fileUpload.click();
             });
-            cameraWeedsBtn.addEventListener('click', () => {
+            allElements.cameraWeedsBtn.addEventListener('click', () => {
                 currentAnalysisType = 'weed';
-                fileUpload.setAttribute('capture', 'environment');
-                fileUpload.click();
+                allElements.fileUpload.setAttribute('capture', 'environment');
+                allElements.fileUpload.click();
             });
-            fileUpload.addEventListener('change', (event) => {
+            allElements.fileUpload.addEventListener('change', (event) => {
                 const file = event.target.files[0];
                 if (!file) return;
                 
@@ -726,7 +781,7 @@
             // --- LÓGICA DE DIAGNÓSTICO Y CHAT ---
             function initializeChat() {
                 const lang = currentLanguage;
-                chatMessages.innerHTML = `
+                allElements.chatMessages.innerHTML = `
                     <div class="m-auto text-center">
                         <p class="text-gray-500" data-translate="initialChatMessage">${translations[lang].initialChatMessage}</p>
                         <div class="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg text-sm">
@@ -743,42 +798,42 @@
                     initializeChat();
                     return;
                 }
-                showLoader(chatMessages, "La IA está analizando...");
-                chatForm.classList.add('hidden');
+                showLoader(allElements.chatMessages, "La IA está analizando...");
+                allElements.chatForm.classList.add('hidden');
                 const langInstruction = `Respond in ${currentLanguage === 'es' ? 'Spanish' : 'English'}.`;
                 const initialPrompt = `You are an expert agronomy and soil science assistant. First, determine if the image is primarily of a plant (leaf, stem, fruit) or of soil. IF THE IMAGE IS OF A PLANT: 1. Identification: Identify the plant species. 2. Visual Diagnosis: Diagnose any possible disease, pest, or deficiency. 3. Action Plan: Provide a clear, organic, and low-cost action plan. IF THE IMAGE IS OF SOIL: 1. Soil Type Analysis: Based on color and texture, estimate the soil type. 2. Nutrient & pH Estimation: Based on visual cues, provide an estimated pH range and assess potential nutrient levels. 3. Recommendations: Provide clear, actionable steps to improve the soil. ${langInstruction} At the end, invite the user to ask more questions.`;
                 conversationHistory = [{ role: "user", parts: [{ text: initialPrompt }, { inlineData: { mimeType: "image/jpeg", data: base64ImageData.split(',')[1] } }] }];
                 const payload = { contents: conversationHistory };
                 const analysisText = await callGemini(payload, 'last-diagnosis');
                 await incrementUsage();
-                chatMessages.innerHTML = '';
+                allElements.chatMessages.innerHTML = '';
                 conversationHistory.push({ role: "model", parts: [{ text: analysisText }] });
                 appendChatMessage(analysisText, 'assistant');
                 if (userProfile.isPremium) {
-                    chatForm.classList.remove('hidden');
+                    allElements.chatForm.classList.remove('hidden');
                 }
             }
 
-            chatForm.addEventListener('submit', async (e) => {
+            allElements.chatForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
-                const userMessage = chatInput.value.trim();
+                const userMessage = allElements.chatInput.value.trim();
                 if (!userMessage || !navigator.onLine) return;
                 appendChatMessage(userMessage, 'user');
-                chatInput.value = '';
-                chatInput.disabled = true;
+                allElements.chatInput.value = '';
+                allElements.chatInput.disabled = true;
                 conversationHistory.push({ role: "user", parts: [{ text: userMessage }] });
                 const payload = { contents: conversationHistory };
                 const typingLoader = document.createElement('div');
                 typingLoader.className = 'chat-message chat-assistant';
                 typingLoader.innerHTML = `<div class="loader" style="width:25px; height:25px; border-width:3px;"></div>`;
-                chatMessages.appendChild(typingLoader);
-                chatMessages.scrollTop = chatMessages.scrollHeight;
+                allElements.chatMessages.appendChild(typingLoader);
+                allElements.chatMessages.scrollTop = allElements.chatMessages.scrollHeight;
                 const aiResponse = await callGemini(payload);
                 typingLoader.remove();
                 conversationHistory.push({ role: "model", parts: [{ text: aiResponse }] });
                 appendChatMessage(aiResponse, 'assistant');
-                chatInput.disabled = false;
-                chatInput.focus();
+                allElements.chatInput.disabled = false;
+                allElements.chatInput.focus();
             });
 
             function appendChatMessage(text, sender) {
@@ -798,16 +853,16 @@
                     });
                     messageWrapper.appendChild(speakBtn);
                 }
-                chatMessages.appendChild(messageWrapper);
-                chatMessages.scrollTop = chatMessages.scrollHeight;
+                allElements.chatMessages.appendChild(messageWrapper);
+                allElements.chatMessages.scrollTop = allElements.chatMessages.scrollHeight;
             }
 
             // --- LÓGICA DEL CALENDARIO, BIBLIOTECA, RIEGO, MALEZAS, ALERTAS ---
-            generateCalendarBtn.addEventListener('click', async () => { /* ... */ });
-            librarySearchBtn.addEventListener('click', searchLibrary);
-            librarySearchInput.addEventListener('keyup', (event) => { if (event.key === 'Enter') searchLibrary(); });
+            allElements.generateCalendarBtn.addEventListener('click', async () => { /* ... */ });
+            allElements.librarySearchBtn.addEventListener('click', searchLibrary);
+            allElements.librarySearchInput.addEventListener('keyup', (event) => { if (event.key === 'Enter') searchLibrary(); });
             async function searchLibrary() { /* ... */ }
-            calculateIrrigationBtn.addEventListener('click', async () => { /* ... */ });
+            allElements.calculateIrrigationBtn.addEventListener('click', async () => { /* ... */ });
             async function analyzeWeed(base64ImageData) { /* ... */ }
             function generateAlerts() { /* ... */ }
             function updateAlertBadge() { /* ... */ }
@@ -830,19 +885,25 @@
         }
         
         // --- INICIALIZACIÓN GLOBAL ---
-        window.onload = () => {
+        document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('google-login-btn').addEventListener('click', () => signInWithPopup(auth, googleProvider).catch(error => handleAuthError(error)));
             document.getElementById('facebook-login-btn').addEventListener('click', () => signInWithPopup(auth, facebookProvider).catch(error => handleAuthError(error)));
             document.getElementById('guest-login-btn').addEventListener('click', () => signInAnonymously(auth).catch(error => handleAuthError(error)));
-            document.getElementById('upgrade-btn-main').addEventListener('click', () => upgradeModal.classList.remove('hidden'));
-            document.getElementById('close-upgrade-modal').addEventListener('click', () => upgradeModal.classList.add('hidden'));
-            userMenuBtn.addEventListener('click', () => {
+            document.getElementById('upgrade-btn-main').addEventListener('click', () => allElements.upgradeModal.classList.remove('hidden'));
+            document.getElementById('close-upgrade-modal').addEventListener('click', () => allElements.upgradeModal.classList.add('hidden'));
+            allElements.userMenuBtn.addEventListener('click', () => {
                 if (currentUser) {
-                    if (confirm(currentLanguage === 'es' ? '¿Quieres cerrar sesión?' : 'Do you want to sign out?')) {
+                    const confirmMsg = currentUser.isAnonymous ? translations[currentLanguage].confirmLogoutGuest : translations[currentLanguage].confirmLogout;
+                    if (confirm(confirmMsg)) {
                         signOut(auth);
                     }
                 } else {
-                    loginModal.classList.remove('hidden');
+                    allElements.loginModal.classList.remove('hidden');
+                }
+            });
+            allElements.showLoginBtn.addEventListener('click', () => {
+                if (confirm(translations[currentLanguage].confirmLogoutGuest)) {
+                    signOut(auth);
                 }
             });
 
@@ -882,7 +943,7 @@
                     signInWithEmailAndPassword(auth, email, password).catch(error => handleAuthError(error));
                 }
             });
-        };
+        });
     </script>
 </body>
 </html>
