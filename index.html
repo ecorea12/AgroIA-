@@ -294,6 +294,7 @@
         let usageData = { analysesCount: 0, lastAnalysisDate: null };
         const DAILY_ANALYSIS_LIMIT = 3;
         let isRegisterMode = false;
+        let appInitialized = false;
 
         // --- LÓGICA DE AUTENTICACIÓN ---
         const loginModal = document.getElementById('login-modal');
@@ -308,11 +309,16 @@
                 loginModal.classList.add('hidden');
                 await loadUserData();
                 updateUIForUser();
+                if (!appInitialized) {
+                    initializeAppLogic();
+                    appInitialized = true;
+                }
             } else {
                 currentUser = null;
                 userProfile = { isPremium: false };
                 loginModal.classList.remove('hidden');
                 updateUIForUser();
+                appInitialized = false; // Reset app state on logout
             }
         });
 
@@ -363,53 +369,6 @@
             chatForm.classList.toggle('hidden', !userProfile.isPremium);
         }
 
-        document.getElementById('google-login-btn').addEventListener('click', () => {
-            signInWithPopup(auth, googleProvider).catch(error => handleAuthError(error));
-        });
-        document.getElementById('facebook-login-btn').addEventListener('click', () => {
-            signInWithPopup(auth, facebookProvider).catch(error => handleAuthError(error));
-        });
-        document.getElementById('guest-login-btn').addEventListener('click', () => {
-            signInAnonymously(auth).catch(error => handleAuthError(error));
-        });
-
-        const emailForm = document.getElementById('email-form');
-        const emailActionBtn = document.getElementById('email-action-btn');
-        const authToggleBtn = document.getElementById('auth-toggle-btn');
-        const authToggleText = document.getElementById('auth-toggle-text');
-        const authError = document.getElementById('auth-error');
-
-        authToggleBtn.addEventListener('click', () => {
-            isRegisterMode = !isRegisterMode;
-            updateAuthForm();
-        });
-
-        function updateAuthForm() {
-            authError.classList.add('hidden');
-            if (isRegisterMode) {
-                emailActionBtn.textContent = translations[currentLanguage].registerHere;
-                authToggleText.textContent = translations[currentLanguage].hasAccount;
-                authToggleBtn.textContent = translations[currentLanguage].loginHere;
-            } else {
-                emailActionBtn.textContent = translations[currentLanguage].loginEmail;
-                authToggleText.textContent = translations[currentLanguage].noAccount;
-                authToggleBtn.textContent = translations[currentLanguage].registerHere;
-            }
-        }
-
-        emailForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const email = document.getElementById('email-input').value;
-            const password = document.getElementById('password-input').value;
-            authError.classList.add('hidden');
-
-            if (isRegisterMode) {
-                createUserWithEmailAndPassword(auth, email, password).catch(error => handleAuthError(error));
-            } else {
-                signInWithEmailAndPassword(auth, email, password).catch(error => handleAuthError(error));
-            }
-        });
-
         function handleAuthError(error) {
             console.error("Auth Error:", error.code, error.message);
             let message = "Ocurrió un error. Inténtalo de nuevo.";
@@ -436,16 +395,6 @@
             authError.classList.remove('hidden');
         }
 
-        userMenuBtn.addEventListener('click', () => {
-            if (currentUser) {
-                if (confirm(currentLanguage === 'es' ? '¿Quieres cerrar sesión?' : 'Do you want to sign out?')) {
-                    signOut(auth);
-                }
-            } else {
-                loginModal.classList.remove('hidden');
-            }
-        });
-
         // --- LÓGICA DE FREEMIUM ---
         async function checkUsageLimit() {
             if (userProfile.isPremium) return true;
@@ -469,18 +418,119 @@
             updateUIForUser();
         }
 
-        document.getElementById('upgrade-btn-main').addEventListener('click', () => upgradeModal.classList.remove('hidden'));
-        document.getElementById('close-upgrade-modal').addEventListener('click', () => upgradeModal.classList.add('hidden'));
-
-        // ... (El resto del código de la aplicación, como callGemini, etc., va aquí)
-        // ... El código de las demás funciones se mantiene igual
-        
         // --- INICIALIZACIÓN DE LA APP ---
-        window.onload = () => {
+        function initializeAppLogic() {
+            // El resto del código de la aplicación va aquí
+            const allElements = {
+                // ... (definir todos los elementos del DOM aquí para que no se repitan)
+            };
+
+            // --- LÓGICA DE TRADUCCIÓN ---
+            const translations = { /* ... */ };
+            function setLanguage(lang) { /* ... */ }
+            langSwitcher.addEventListener('click', () => { /* ... */ });
+
+            // --- FUNCIONES DE NAVEGACIÓN ---
+            function switchView(view) { /* ... */ }
+            navDiagnosis.addEventListener('click', () => switchView('diagnosis'));
+            navCalendar.addEventListener('click', () => switchView('calendar'));
+            navLibrary.addEventListener('click', () => switchView('library'));
+            navIrrigation.addEventListener('click', () => switchView('irrigation'));
+            navAlerts.addEventListener('click', () => switchView('alerts'));
+            navWeeds.addEventListener('click', () => switchView('weeds'));
+
+            // --- FUNCIÓN SEGURA PARA LLAMAR A LA IA ---
+            async function callGemini(payload, cacheKey = null) { /* ... */ }
+            function formatResponse(markdownText) { /* ... */ }
+            function showLoader(container, message) { /* ... */ }
+            
+            // --- LÓGICA DE ASISTENTE DE VOZ ---
+            const synth = window.speechSynthesis;
+            let currentUtterance = null;
+            function speakText(text, button) { /* ... */ }
+
+            // --- LÓGICA DE CAPTURA DE IMAGEN ---
+            galleryBtn.addEventListener('click', () => { /* ... */ });
+            cameraBtn.addEventListener('click', () => { /* ... */ });
+            galleryWeedsBtn.addEventListener('click', () => { /* ... */ });
+            cameraWeedsBtn.addEventListener('click', () => { /* ... */ });
+            fileUpload.addEventListener('change', (event) => { /* ... */ });
+
+            // --- LÓGICA DE DIAGNÓSTICO Y CHAT ---
+            function initializeChat() { /* ... */ }
+            async function analyzeImage(base64ImageData) { /* ... */ }
+            chatForm.addEventListener('submit', async (e) => { /* ... */ });
+            function appendChatMessage(text, sender) { /* ... */ }
+
+            // --- LÓGICA DEL CALENDARIO, BIBLIOTECA, RIEGO, MALEZAS, ALERTAS ---
+            generateCalendarBtn.addEventListener('click', async () => { /* ... */ });
+            librarySearchBtn.addEventListener('click', searchLibrary);
+            calculateIrrigationBtn.addEventListener('click', async () => { /* ... */ });
+            async function analyzeWeed(base64ImageData) { /* ... */ }
+            function generateAlerts() { /* ... */ }
+            function updateAlertBadge() { /* ... */ }
+            function displayAlerts() { /* ... */ }
+
+            // --- FUNCIONES AUXILIARES Y DE INICIALIZACIÓN ---
+            async function fetchWeather(lat, lon) { /* ... */ }
+            function initializeWeather() { /* ... */ }
+            async function fetchTipOfTheDay() { /* ... */ }
+            function updateOnlineStatus() { /* ... */ }
+            window.addEventListener('online', updateOnlineStatus);
+            window.addEventListener('offline', updateOnlineStatus);
+
+            // --- INICIALIZACIÓN FINAL ---
             const savedLang = localStorage.getItem('agroia-lang') || 'es';
             setLanguage(savedLang);
             updateOnlineStatus();
-            // La app esperará a onAuthStateChanged para mostrar el contenido
+            switchView('diagnosis');
+            initializeWeather();
+        }
+        
+        // --- INICIALIZACIÓN GLOBAL ---
+        window.onload = () => {
+             // Configuración inicial de botones de login que no dependen del estado de la app
+            document.getElementById('google-login-btn').addEventListener('click', () => signInWithPopup(auth, googleProvider).catch(error => handleAuthError(error)));
+            document.getElementById('facebook-login-btn').addEventListener('click', () => signInWithPopup(auth, facebookProvider).catch(error => handleAuthError(error)));
+            document.getElementById('guest-login-btn').addEventListener('click', () => signInAnonymously(auth).catch(error => handleAuthError(error)));
+            document.getElementById('upgrade-btn-main').addEventListener('click', () => upgradeModal.classList.remove('hidden'));
+            document.getElementById('close-upgrade-modal').addEventListener('click', () => upgradeModal.classList.add('hidden'));
+
+            const emailForm = document.getElementById('email-form');
+            const authToggleBtn = document.getElementById('auth-toggle-btn');
+
+            authToggleBtn.addEventListener('click', () => {
+                isRegisterMode = !isRegisterMode;
+                updateAuthForm();
+            });
+
+            function updateAuthForm() {
+                const lang = currentLanguage;
+                const emailActionBtn = document.getElementById('email-action-btn');
+                const authToggleText = document.getElementById('auth-toggle-text');
+                const authError = document.getElementById('auth-error');
+                authError.classList.add('hidden');
+                if (isRegisterMode) {
+                    emailActionBtn.textContent = translations[lang].registerHere;
+                    authToggleText.textContent = translations[lang].hasAccount;
+                    authToggleBtn.textContent = translations[lang].loginHere;
+                } else {
+                    emailActionBtn.textContent = translations[lang].loginEmail;
+                    authToggleText.textContent = translations[lang].noAccount;
+                    authToggleBtn.textContent = translations[lang].registerHere;
+                }
+            }
+
+            emailForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const email = document.getElementById('email-input').value;
+                const password = document.getElementById('password-input').value;
+                if (isRegisterMode) {
+                    createUserWithEmailAndPassword(auth, email, password).catch(error => handleAuthError(error));
+                } else {
+                    signInWithEmailAndPassword(auth, email, password).catch(error => handleAuthError(error));
+                }
+            });
         };
     </script>
 </body>
