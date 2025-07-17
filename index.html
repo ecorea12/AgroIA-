@@ -295,13 +295,53 @@
         let isRegisterMode = false;
         let appInitialized = false;
 
-        // --- LÓGICA DE AUTENTICACIÓN ---
+        // --- ELEMENTOS DEL DOM (Declaración Global) ---
+        const statusIndicator = document.getElementById('status-indicator');
+        const fileUpload = document.getElementById('file-upload');
+        const galleryBtn = document.getElementById('gallery-btn');
+        const cameraBtn = document.getElementById('camera-btn');
+        const galleryWeedsBtn = document.getElementById('gallery-weeds-btn');
+        const cameraWeedsBtn = document.getElementById('camera-weeds-btn');
+        const weatherInfo = document.getElementById('weather-info');
+        const locationName = document.getElementById('location-name');
+        const langSwitcher = document.getElementById('lang-switcher');
+        const langFlag = document.getElementById('lang-flag');
+        const alertBadge = document.getElementById('alert-badge');
+        const chatMessages = document.getElementById('chat-messages');
+        const chatForm = document.getElementById('chat-form');
+        const chatInput = document.getElementById('chat-input');
+        const cropSelectCalendar = document.getElementById('crop-select-calendar');
+        const generateCalendarBtn = document.getElementById('generate-calendar-btn');
+        const calendarResultsContainer = document.getElementById('calendar-results-container');
+        const librarySearchInput = document.getElementById('library-search-input');
+        const librarySearchBtn = document.getElementById('library-search-btn');
+        const libraryResultsContainer = document.getElementById('library-results-container');
+        const cropSelectIrrigation = document.getElementById('crop-select-irrigation');
+        const calculateIrrigationBtn = document.getElementById('calculate-irrigation-btn');
+        const irrigationResultsContainer = document.getElementById('irrigation-results-container');
+        const alertsContainer = document.getElementById('alerts-container');
+        const weedsResultsContainer = document.getElementById('weeds-results-container');
+        const navDiagnosis = document.getElementById('nav-diagnosis');
+        const navCalendar = document.getElementById('nav-calendar');
+        const navLibrary = document.getElementById('nav-library');
+        const navIrrigation = document.getElementById('nav-irrigation');
+        const navAlerts = document.getElementById('nav-alerts');
+        const navWeeds = document.getElementById('nav-weeds');
+        const viewDiagnosis = document.getElementById('view-diagnosis');
+        const viewCalendar = document.getElementById('view-calendar');
+        const viewLibrary = document.getElementById('view-library');
+        const viewIrrigation = document.getElementById('view-irrigation');
+        const viewAlerts = document.getElementById('view-alerts');
+        const viewWeeds = document.getElementById('view-weeds');
+        const controlsDiagnosis = document.getElementById('controls-diagnosis');
+        const controlsWeeds = document.getElementById('controls-weeds');
         const loginModal = document.getElementById('login-modal');
         const upgradeModal = document.getElementById('upgrade-modal');
         const userMenuBtn = document.getElementById('user-menu-btn');
         const userIcon = document.getElementById('user-icon');
         const userAvatar = document.getElementById('user-avatar');
-        
+
+        // --- LÓGICA DE AUTENTICACIÓN ---
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 currentUser = user;
@@ -420,52 +460,56 @@
             updateUIForUser();
         }
         
-        // --- INICIALIZACIÓN DE LA APP ---
+        // --- INICIALIZACIÓN DE LA APP (SE LLAMA DESPUÉS DEL LOGIN) ---
         function initializeAppLogic() {
-            // --- Elementos del DOM (dentro de la inicialización) ---
-            const statusIndicator = document.getElementById('status-indicator');
-            const fileUpload = document.getElementById('file-upload');
-            const galleryBtn = document.getElementById('gallery-btn');
-            const cameraBtn = document.getElementById('camera-btn');
-            const galleryWeedsBtn = document.getElementById('gallery-weeds-btn');
-            const cameraWeedsBtn = document.getElementById('camera-weeds-btn');
-            const weatherInfo = document.getElementById('weather-info');
-            const locationName = document.getElementById('location-name');
-            const langSwitcher = document.getElementById('lang-switcher');
-            const langFlag = document.getElementById('lang-flag');
-            const alertBadge = document.getElementById('alert-badge');
-            const chatMessages = document.getElementById('chat-messages');
-            const chatForm = document.getElementById('chat-form');
-            const chatInput = document.getElementById('chat-input');
-            const cropSelectCalendar = document.getElementById('crop-select-calendar');
-            const generateCalendarBtn = document.getElementById('generate-calendar-btn');
-            const calendarResultsContainer = document.getElementById('calendar-results-container');
-            const librarySearchInput = document.getElementById('library-search-input');
-            const librarySearchBtn = document.getElementById('library-search-btn');
-            const libraryResultsContainer = document.getElementById('library-results-container');
-            const cropSelectIrrigation = document.getElementById('crop-select-irrigation');
-            const calculateIrrigationBtn = document.getElementById('calculate-irrigation-btn');
-            const irrigationResultsContainer = document.getElementById('irrigation-results-container');
-            const alertsContainer = document.getElementById('alerts-container');
-            const weedsResultsContainer = document.getElementById('weeds-results-container');
-            const navDiagnosis = document.getElementById('nav-diagnosis');
-            const navCalendar = document.getElementById('nav-calendar');
-            const navLibrary = document.getElementById('nav-library');
-            const navIrrigation = document.getElementById('nav-irrigation');
-            const navAlerts = document.getElementById('nav-alerts');
-            const navWeeds = document.getElementById('nav-weeds');
-            const viewDiagnosis = document.getElementById('view-diagnosis');
-            const viewCalendar = document.getElementById('view-calendar');
-            const viewLibrary = document.getElementById('view-library');
-            const viewIrrigation = document.getElementById('view-irrigation');
-            const viewAlerts = document.getElementById('view-alerts');
-            const viewWeeds = document.getElementById('view-weeds');
-            const controlsDiagnosis = document.getElementById('controls-diagnosis');
-            const controlsWeeds = document.getElementById('controls-weeds');
-            
             let currentAnalysisType = 'plant_soil';
 
             // --- LÓGICA DE TRADUCCIÓN ---
+            const translations = {
+                es: {
+                    appSubtitle: "Tu compañero IA para una agricultura sostenible.",
+                    toolsTitle: "Herramientas Principales",
+                    navDiagnosis: "Chat", navCalendar: "Calendario", navLibrary: "Biblioteca", navIrrigation: "Riego", navAlerts: "Alertas", navWeeds: "Malezas",
+                    diagnoseTitle: "Analizar Foto", diagnoseSubtitle: "Sube una foto de una planta o del suelo para analizarla.",
+                    galleryButton: "Galería", cameraButton: "Cámara",
+                    weatherTitle: "Clima en", chatTitle: "Asistente Interactivo", chatPlaceholder: "Escribe tu pregunta...",
+                    calendarTitle: "Calendario de Cultivo Inteligente", selectCrop: "Selecciona un cultivo:", generateCalendar: "Generar Calendario",
+                    libraryTitle: "Biblioteca de Plagas y Enfermedades", libraryPlaceholder: "Ej: Roya, Mosca blanca...",
+                    irrigationTitle: "Calculadora de Riego Inteligente", selectCropIrrigation: "Selecciona tu cultivo:", calculateIrrigation: "Calcular Riego",
+                    alertsTitle: "Centro de Alertas",
+                    weedsTitle: "Identificar Maleza", weedsSubtitle: "Toma o sube una foto de una maleza para obtener un plan de control.",
+                    initialChatMessage: "Usa la galería o la cámara para analizar una foto de una planta o del suelo.", tipOfTheDay: "Consejo del Día:", loading: "Cargando...",
+                    onlineStatus: "Conectado", offlineStatus: "Sin conexión (Modo Offline)",
+                    initialCalendarMessage: "Selecciona un cultivo y genera un plan de acción para todo el ciclo.",
+                    initialLibraryMessage: "Busca una plaga o enfermedad para ver su ficha técnica.",
+                    initialIrrigationMessage: "Selecciona tu cultivo para obtener una recomendación de riego basada en el pronóstico del tiempo.",
+                    initialWeedsMessage: "Usa la galería o la cámara para identificar una maleza y recibir un plan de control.",
+                    noAlerts: "No hay alertas nuevas.",
+                    speakButtonTitle: "Leer en voz alta"
+                },
+                en: {
+                    appSubtitle: "Your AI companion for sustainable agriculture.",
+                    toolsTitle: "Main Tools",
+                    navDiagnosis: "Chat", navCalendar: "Calendar", navLibrary: "Library", navIrrigation: "Irrigation", navAlerts: "Alerts", navWeeds: "Weeds",
+                    diagnoseTitle: "Analyze Photo", diagnoseSubtitle: "Upload a photo of a plant or soil for analysis.",
+                    galleryButton: "Gallery", cameraButton: "Camera",
+                    weatherTitle: "Weather in", chatTitle: "Interactive Assistant", chatPlaceholder: "Type your question...",
+                    calendarTitle: "Smart Crop Calendar", selectCrop: "Select a crop:", generateCalendar: "Generate Calendar",
+                    libraryTitle: "Pest & Disease Library", libraryPlaceholder: "E.g., Rust, Whitefly...",
+                    irrigationTitle: "Smart Irrigation Calculator", selectCropIrrigation: "Select your crop:", calculateIrrigation: "Calculate Irrigation",
+                    alertsTitle: "Alert Center",
+                    weedsTitle: "Weed Identifier", weedsSubtitle: "Take or upload a photo of a weed to get a control plan.",
+                    initialChatMessage: "Use the gallery or camera to analyze a photo of a plant or soil.", tipOfTheDay: "Tip of the Day:", loading: "Loading...",
+                    onlineStatus: "Online", offlineStatus: "Offline Mode",
+                    initialCalendarMessage: "Select a crop and generate an action plan for the entire cycle.",
+                    initialLibraryMessage: "Search for a pest or disease to see its technical sheet.",
+                    initialIrrigationMessage: "Select your crop to get an irrigation recommendation based on the weather forecast.",
+                    initialWeedsMessage: "Use the gallery or camera to identify a weed and receive a control plan.",
+                    noAlerts: "No new alerts.",
+                    speakButtonTitle: "Read aloud"
+                }
+            };
+
             function setLanguage(lang) {
                 currentLanguage = lang;
                 localStorage.setItem('agroia-lang', lang);
@@ -509,18 +553,24 @@
             function switchView(view) {
                 const premiumViews = ['calendar', 'irrigation', 'alerts', 'weeds'];
                 if (premiumViews.includes(view) && !userProfile.isPremium) {
-                    document.getElementById('view-premium-locked').classList.remove('hidden');
+                    const viewPremiumLocked = document.getElementById('view-premium-locked');
+                    viewPremiumLocked.classList.remove('hidden');
                     // Ocultar todas las vistas principales
                     viewDiagnosis.classList.add('hidden');
-                    viewCalendar.classList.add('hidden');
-                    viewLibrary.classList.add('hidden');
-                    viewIrrigation.classList.add('hidden');
-                    viewAlerts.classList.add('hidden');
-                    viewWeeds.classList.add('hidden');
+                    const calendarView = document.getElementById('view-calendar');
+                    if(calendarView) calendarView.classList.add('hidden');
+                    const libraryView = document.getElementById('view-library');
+                    if(libraryView) libraryView.classList.add('hidden');
+                    const irrigationView = document.getElementById('view-irrigation');
+                    if(irrigationView) irrigationView.classList.add('hidden');
+                    const alertsView = document.getElementById('view-alerts');
+                    if(alertsView) alertsView.classList.add('hidden');
+                    const weedsView = document.getElementById('view-weeds');
+                    if(weedsView) weedsView.classList.add('hidden');
                     return;
                 }
                 
-                const views = { diagnosis: viewDiagnosis, calendar: viewCalendar, library: viewLibrary, irrigation: viewIrrigation, alerts: viewAlerts, weeds: viewWeeds };
+                const views = { diagnosis: viewDiagnosis, calendar: document.getElementById('view-calendar'), library: document.getElementById('view-library'), irrigation: document.getElementById('view-irrigation'), alerts: document.getElementById('view-alerts'), weeds: document.getElementById('view-weeds') };
                 const navs = { diagnosis: navDiagnosis, calendar: navCalendar, library: navLibrary, irrigation: navIrrigation, alerts: navAlerts, weeds: navWeeds };
                 
                 document.getElementById('view-premium-locked').classList.add('hidden');
@@ -798,16 +848,17 @@
 
             const emailForm = document.getElementById('email-form');
             const authToggleBtn = document.getElementById('auth-toggle-btn');
-
+            
             authToggleBtn.addEventListener('click', () => {
                 isRegisterMode = !isRegisterMode;
                 updateAuthForm();
             });
 
             function updateAuthForm() {
-                const lang = currentLanguage;
+                const lang = currentLanguage || 'es';
                 const emailActionBtn = document.getElementById('email-action-btn');
                 const authToggleText = document.getElementById('auth-toggle-text');
+                const authToggleBtn = document.getElementById('auth-toggle-btn');
                 const authError = document.getElementById('auth-error');
                 authError.classList.add('hidden');
                 if (isRegisterMode) {
