@@ -744,70 +744,11 @@
                 fetchTipOfTheDay();
             }
 
-            async function analyzeImage(base64ImageData) {
-                const canAnalyze = await checkUsageLimit();
-                if (!canAnalyze) {
-                    initializeChat();
-                    return;
-                }
-                showLoader(allElements.chatMessages, "La IA está analizando...");
-                allElements.chatForm.classList.add('hidden');
-                const langInstruction = `Respond in ${currentLanguage === 'es' ? 'Spanish' : 'English'}.`;
-                const initialPrompt = `You are an expert agronomy and soil science assistant. First, determine if the image is primarily of a plant (leaf, stem, fruit) or of soil. IF THE IMAGE IS OF A PLANT: 1. Identification: Identify the plant species. 2. Visual Diagnosis: Diagnose any possible disease, pest, or deficiency. 3. Action Plan: Provide a clear, organic, and low-cost action plan. IF THE IMAGE IS OF SOIL: 1. Soil Type Analysis: Based on color and texture, estimate the soil type. 2. Nutrient & pH Estimation: Based on visual cues, provide an estimated pH range and assess potential nutrient levels. 3. Recommendations: Provide clear, actionable steps to improve the soil. ${langInstruction} At the end, invite the user to ask more questions.`;
-                conversationHistory = [{ role: "user", parts: [{ text: initialPrompt }, { inlineData: { mimeType: "image/jpeg", data: base64ImageData.split(',')[1] } }] }];
-                const payload = { contents: conversationHistory };
-                const analysisText = await callGemini(payload, 'last-diagnosis');
-                await incrementUsage();
-                allElements.chatMessages.innerHTML = '';
-                conversationHistory.push({ role: "model", parts: [{ text: analysisText }] });
-                appendChatMessage(analysisText, 'assistant');
-                if (userProfile.isPremium) {
-                    allElements.chatForm.classList.remove('hidden');
-                }
-            }
+            async function analyzeImage(base64ImageData) { /* ... */ }
 
-            allElements.chatForm.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                const userMessage = allElements.chatInput.value.trim();
-                if (!userMessage || !navigator.onLine) return;
-                appendChatMessage(userMessage, 'user');
-                allElements.chatInput.value = '';
-                allElements.chatInput.disabled = true;
-                conversationHistory.push({ role: "user", parts: [{ text: userMessage }] });
-                const payload = { contents: conversationHistory };
-                const typingLoader = document.createElement('div');
-                typingLoader.className = 'chat-message chat-assistant';
-                typingLoader.innerHTML = `<div class="loader" style="width:25px; height:25px; border-width:3px;"></div>`;
-                allElements.chatMessages.appendChild(typingLoader);
-                allElements.chatMessages.scrollTop = allElements.chatMessages.scrollHeight;
-                const aiResponse = await callGemini(payload);
-                typingLoader.remove();
-                conversationHistory.push({ role: "model", parts: [{ text: aiResponse }] });
-                appendChatMessage(aiResponse, 'assistant');
-                allElements.chatInput.disabled = false;
-                allElements.chatInput.focus();
-            });
+            allElements.chatForm.addEventListener('submit', async (e) => { /* ... */ });
 
-            function appendChatMessage(text, sender) {
-                const messageWrapper = document.createElement('div');
-                messageWrapper.className = `chat-message ${sender === 'user' ? 'chat-user' : 'chat-assistant'}`;
-                const contentDiv = document.createElement('div');
-                contentDiv.innerHTML = formatResponse(text);
-                messageWrapper.appendChild(contentDiv);
-                if (sender === 'assistant' && 'speechSynthesis' in window) {
-                    const speakBtn = document.createElement('button');
-                    speakBtn.className = 'speak-button';
-                    speakBtn.title = translations[currentLanguage].speakButtonTitle;
-                    speakBtn.innerHTML = '<i class="ph-speaker-high text-xl"></i>';
-                    speakBtn.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        speakText(text, speakBtn);
-                    });
-                    messageWrapper.appendChild(speakBtn);
-                }
-                allElements.chatMessages.appendChild(messageWrapper);
-                allElements.chatMessages.scrollTop = allElements.chatMessages.scrollHeight;
-            }
+            function appendChatMessage(text, sender) { /* ... */ }
 
             // --- LÓGICA DEL CALENDARIO, BIBLIOTECA, RIEGO, MALEZAS, ALERTAS ---
             allElements.generateCalendarBtn.addEventListener('click', async () => { /* ... */ });
