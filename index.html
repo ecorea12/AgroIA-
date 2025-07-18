@@ -132,6 +132,9 @@
                              <button id="nav-weeds" class="nav-button p-3 rounded-lg font-semibold flex items-center justify-center gap-2 text-sm">
                                 <i class="ph-leaf"></i> <span data-translate="navWeeds">Malezas</span>
                             </button>
+                             <button id="nav-grafting" class="nav-button p-3 rounded-lg font-semibold flex items-center justify-center gap-2 text-sm">
+                                <i class="ph-tree-structure"></i> <span data-translate="navGrafting">Injertos</span>
+                            </button>
                         </div>
                     </div>
 
@@ -221,6 +224,29 @@
                         <p class="text-gray-600 mt-2 max-w-sm" data-translate="premiumDescription">Esta herramienta es parte de AgroIA Premium. Actualiza para desbloquear esta y otras funciones avanzadas.</p>
                         <button id="upgrade-btn-main" class="mt-6 bg-amber-500 text-white font-bold py-2 px-6 rounded-lg hover:bg-amber-600 transition-colors" data-translate="upgradeNow">Actualizar Ahora</button>
                     </div>
+                    
+                    <!-- VISTA DE INJERTOS -->
+                    <div id="view-grafting" class="hidden">
+                        <h2 class="text-2xl font-bold text-gray-700 mb-4 flex items-center gap-2">
+                            <i class="ph-tree-structure text-purple-500"></i>
+                            <span data-translate="graftingTitle">Guía de Injertos</span>
+                        </h2>
+                        <div class="space-y-4">
+                            <div>
+                                <label for="rootstock-select" class="block text-sm font-medium text-gray-700" data-translate="graftingRootstock">Selecciona el Portainjerto (Base):</label>
+                                <select id="rootstock-select" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm rounded-md"></select>
+                            </div>
+                             <div>
+                                <label for="scion-select" class="block text-sm font-medium text-gray-700" data-translate="graftingScion">Selecciona el Injerto (Vareta):</label>
+                                <select id="scion-select" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm rounded-md"></select>
+                            </div>
+                            <button id="generate-graft-guide-btn" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg flex items-center justify-center gap-2 transition-colors">
+                                <i class="ph-magic-wand"></i> <span data-translate="graftingGenerate">Generar Guía</span>
+                            </button>
+                            <p class="text-xs text-center text-gray-500"><span data-translate="graftsLeft">Guías restantes hoy:</span> <span id="grafts-left-count">3</span></p>
+                            <div id="grafting-results-container" class="prose max-w-none mt-4 h-[40vh] overflow-y-auto"></div>
+                        </div>
+                    </div>
                 </div>
             </main>
         </div>
@@ -271,6 +297,7 @@
                 <li class="flex items-center gap-3"><i class="ph-check-circle text-green-500 text-xl"></i><span data-translate="premiumFeature3">Alertas y Notificaciones Proactivas</span></li>
                 <li class="flex items-center gap-3"><i class="ph-check-circle text-green-500 text-xl"></i><span data-translate="premiumFeature4">Calculadora de Riego Inteligente</span></li>
                 <li class="flex items-center gap-3"><i class="ph-check-circle text-green-500 text-xl"></i><span data-translate="premiumFeature5">Calendario de Cultivo y Control de Malezas</span></li>
+                <li class="flex items-center gap-3"><i class="ph-check-circle text-green-500 text-xl"></i><span data-translate="premiumFeature6">Guía de Injertos Ilimitada</span></li>
             </ul>
              <button class="mt-8 w-full bg-amber-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-amber-600 transition-colors" data-translate="upgradeNow">Actualizar Ahora</button>
         </div>
@@ -303,8 +330,9 @@
         // --- ESTADO DE LA APLICACIÓN ---
         let currentUser = null;
         let userProfile = { isPremium: false };
-        let usageData = { analysesCount: 0, lastAnalysisDate: null };
+        let usageData = { analysesCount: 0, graftsCount: 0, lastUsageDate: null };
         const DAILY_ANALYSIS_LIMIT = 3;
+        const DAILY_GRAFT_LIMIT = 3;
         let isRegisterMode = false;
         let appInitialized = false;
         let currentLanguage = 'es';
@@ -317,7 +345,7 @@
             es: {
                 appSubtitle: "Tu compañero IA para una agricultura sostenible.",
                 toolsTitle: "Herramientas Principales",
-                navDiagnosis: "Chat", navCalendar: "Calendario", navLibrary: "Biblioteca", navIrrigation: "Riego", navAlerts: "Alertas", navWeeds: "Malezas",
+                navDiagnosis: "Chat", navCalendar: "Calendario", navLibrary: "Biblioteca", navIrrigation: "Riego", navAlerts: "Alertas", navWeeds: "Malezas", navGrafting: "Injertos",
                 diagnoseTitle: "Analizar Foto", diagnoseSubtitle: "Sube una foto de una planta o del suelo para analizarla.",
                 galleryButton: "Galería", cameraButton: "Cámara",
                 weatherTitle: "Clima en", chatTitle: "Asistente Interactivo", chatPlaceholder: "Escribe tu pregunta...",
@@ -326,12 +354,14 @@
                 irrigationTitle: "Calculadora de Riego Inteligente", selectCropIrrigation: "Selecciona tu cultivo:", calculateIrrigation: "Calcular Riego",
                 alertsTitle: "Centro de Alertas",
                 weedsTitle: "Identificar Maleza", weedsSubtitle: "Toma o sube una foto de una maleza para obtener un plan de control.",
+                graftingTitle: "Guía de Injertos", graftingRootstock: "Selecciona el Portainjerto (Base):", graftingScion: "Selecciona el Injerto (Vareta):", graftingGenerate: "Generar Guía", analysesLeft: "Análisis restantes:", graftsLeft: "Guías restantes:",
                 initialChatMessage: "Usa la galería o la cámara para analizar una foto de una planta o del suelo.", tipOfTheDay: "Consejo del Día:", loading: "Cargando...",
                 onlineStatus: "Conectado", offlineStatus: "Sin conexión (Modo Offline)",
                 initialCalendarMessage: "Selecciona un cultivo y genera un plan de acción para todo el ciclo.",
                 initialLibraryMessage: "Busca una plaga o enfermedad para ver su ficha técnica.",
                 initialIrrigationMessage: "Selecciona tu cultivo para obtener una recomendación de riego basada en el pronóstico del tiempo.",
                 initialWeedsMessage: "Usa la galería o la cámara para identificar una maleza y recibir un plan de control.",
+                initialGraftingMessage: "Selecciona dos plantas para verificar su compatibilidad y obtener una guía de injerto.",
                 noAlerts: "No hay alertas nuevas.",
                 speakButtonTitle: "Leer en voz alta",
                 premiumTitle: "Función Premium",
@@ -344,6 +374,7 @@
                 premiumFeature3: "Alertas y Notificaciones Proactivas",
                 premiumFeature4: "Calculadora de Riego Inteligente",
                 premiumFeature5: "Calendario de Cultivo y Control de Malezas",
+                premiumFeature6: "Guía de Injertos Ilimitada",
                 guestMode: "Modo Invitado:",
                 guestMessage: "Tu progreso no se guardará.",
                 registerOrLogin: "Regístrate o Inicia Sesión",
@@ -367,7 +398,7 @@
             en: {
                 appSubtitle: "Your AI companion for sustainable agriculture.",
                 toolsTitle: "Main Tools",
-                navDiagnosis: "Chat", navCalendar: "Calendar", navLibrary: "Library", navIrrigation: "Irrigation", navAlerts: "Alerts", navWeeds: "Weeds",
+                navDiagnosis: "Chat", navCalendar: "Calendar", navLibrary: "Library", navIrrigation: "Irrigation", navAlerts: "Alerts", navWeeds: "Weeds", navGrafting: "Grafting",
                 diagnoseTitle: "Analyze Photo", diagnoseSubtitle: "Upload a photo of a plant or soil for analysis.",
                 galleryButton: "Gallery", cameraButton: "Camera",
                 weatherTitle: "Weather in", chatTitle: "Interactive Assistant", chatPlaceholder: "Type your question...",
@@ -376,12 +407,14 @@
                 irrigationTitle: "Smart Irrigation Calculator", selectCropIrrigation: "Select your crop:", calculateIrrigation: "Calculate Irrigation",
                 alertsTitle: "Alert Center",
                 weedsTitle: "Weed Identifier", weedsSubtitle: "Take or upload a photo of a weed to get a control plan.",
+                graftingTitle: "Grafting Guide", graftingRootstock: "Select Rootstock (Base):", graftingScion: "Select Scion (Variety):", graftingGenerate: "Generate Guide", analysesLeft: "Analyses left:", graftsLeft: "Guides left:",
                 initialChatMessage: "Use the gallery or camera to analyze a photo of a plant or soil.", tipOfTheDay: "Tip of the Day:", loading: "Loading...",
                 onlineStatus: "Online", offlineStatus: "Offline Mode",
                 initialCalendarMessage: "Select a crop and generate an action plan for the entire cycle.",
                 initialLibraryMessage: "Search for a pest or disease to see its technical sheet.",
                 initialIrrigationMessage: "Select your crop to get an irrigation recommendation based on the weather forecast.",
                 initialWeedsMessage: "Use the gallery or camera to identify a weed and receive a control plan.",
+                initialGraftingMessage: "Select two plants to check compatibility and get a grafting guide.",
                 noAlerts: "No new alerts.",
                 speakButtonTitle: "Read aloud",
                 premiumTitle: "Premium Feature",
@@ -394,6 +427,7 @@
                 premiumFeature3: "Proactive Alerts and Notifications",
                 premiumFeature4: "Smart Irrigation Calculator",
                 premiumFeature5: "Crop Calendar and Weed Control",
+                premiumFeature6: "Unlimited Grafting Guides",
                 guestMode: "Guest Mode:",
                 guestMessage: "Your progress will not be saved.",
                 registerOrLogin: "Register or Log In",
@@ -445,18 +479,24 @@
             irrigationResultsContainer: document.getElementById('irrigation-results-container'),
             alertsContainer: document.getElementById('alerts-container'),
             weedsResultsContainer: document.getElementById('weeds-results-container'),
+            graftingResultsContainer: document.getElementById('grafting-results-container'),
+            rootstockSelect: document.getElementById('rootstock-select'),
+            scionSelect: document.getElementById('scion-select'),
+            generateGraftGuideBtn: document.getElementById('generate-graft-guide-btn'),
             navDiagnosis: document.getElementById('nav-diagnosis'),
             navCalendar: document.getElementById('nav-calendar'),
             navLibrary: document.getElementById('nav-library'),
             navIrrigation: document.getElementById('nav-irrigation'),
             navAlerts: document.getElementById('nav-alerts'),
             navWeeds: document.getElementById('nav-weeds'),
+            navGrafting: document.getElementById('nav-grafting'),
             viewDiagnosis: document.getElementById('view-diagnosis'),
             viewCalendar: document.getElementById('view-calendar'),
             viewLibrary: document.getElementById('view-library'),
             viewIrrigation: document.getElementById('view-irrigation'),
             viewAlerts: document.getElementById('view-alerts'),
             viewWeeds: document.getElementById('view-weeds'),
+            viewGrafting: document.getElementById('view-grafting'),
             controlsDiagnosis: document.getElementById('controls-diagnosis'),
             controlsWeeds: document.getElementById('controls-weeds'),
             loginModal: document.getElementById('login-modal'),
@@ -510,7 +550,7 @@
                 const today = new Date().toISOString().split('T')[0];
                 const usageRef = doc(db, `users/${currentUser.uid}/usage/${today}`);
                 const usageSnap = await getDoc(usageRef);
-                usageData = usageSnap.exists() ? usageSnap.data() : { analysesCount: 0, lastAnalysisDate: today };
+                usageData = usageSnap.exists() ? usageSnap.data() : { analysesCount: 0, graftsCount: 0, lastUsageDate: today };
             } else {
                 userProfile = {
                     email: currentUser.email || 'anonymous',
@@ -519,7 +559,7 @@
                     isPremium: false
                 };
                 await setDoc(userRef, userProfile);
-                usageData = { analysesCount: 0, lastAnalysisDate: new Date().toISOString().split('T')[0] };
+                usageData = { analysesCount: 0, graftsCount: 0, lastUsageDate: new Date().toISOString().split('T')[0] };
             }
         }
         
@@ -534,6 +574,8 @@
             }
             const analysesLeft = userProfile.isPremium ? '∞' : Math.max(0, DAILY_ANALYSIS_LIMIT - usageData.analysesCount);
             document.getElementById('analyses-left-count').textContent = analysesLeft;
+            const graftsLeft = userProfile.isPremium ? '∞' : Math.max(0, DAILY_GRAFT_LIMIT - usageData.graftsCount);
+            document.getElementById('grafts-left-count').textContent = graftsLeft;
 
             const premiumFeatures = [allElements.navAlerts, allElements.navCalendar, allElements.navIrrigation, allElements.navWeeds];
             premiumFeatures.forEach(btn => {
@@ -578,22 +620,36 @@
         }
 
         // --- LÓGICA DE FREEMIUM ---
-        async function checkUsageLimit() {
+        async function checkUsageLimit(type) {
             if (userProfile.isPremium) return true;
             const today = new Date().toISOString().split('T')[0];
-            if (usageData.lastAnalysisDate !== today) {
-                usageData = { analysesCount: 0, lastAnalysisDate: today };
+            if (usageData.lastUsageDate !== today) {
+                usageData = { analysesCount: 0, graftsCount: 0, lastUsageDate: today };
             }
-            if (usageData.analysesCount >= DAILY_ANALYSIS_LIMIT) {
+
+            let count, limit;
+            if (type === 'analysis') {
+                count = usageData.analysesCount;
+                limit = DAILY_ANALYSIS_LIMIT;
+            } else if (type === 'graft') {
+                count = usageData.graftsCount;
+                limit = DAILY_GRAFT_LIMIT;
+            }
+
+            if (count >= limit) {
                 allElements.upgradeModal.classList.remove('hidden');
                 return false;
             }
             return true;
         }
 
-        async function incrementUsage() {
+        async function incrementUsage(type) {
             if (userProfile.isPremium) return;
-            usageData.analysesCount++;
+            if (type === 'analysis') {
+                usageData.analysesCount++;
+            } else if (type === 'graft') {
+                usageData.graftsCount++;
+            }
             const today = new Date().toISOString().split('T')[0];
             const usageRef = doc(db, `users/${currentUser.uid}/usage/${today}`);
             await setDoc(usageRef, usageData, { merge: true });
@@ -637,6 +693,7 @@
                 allElements.libraryResultsContainer.innerHTML = `<p class="text-gray-500 text-center mt-8">${translations[lang].initialLibraryMessage}</p>`;
                 allElements.irrigationResultsContainer.innerHTML = `<p class="text-gray-500 text-center mt-8">${translations[lang].initialIrrigationMessage}</p>`;
                 allElements.weedsResultsContainer.innerHTML = `<p class="text-gray-500 text-center mt-8">${translations[lang].initialWeedsMessage}</p>`;
+                allElements.graftingResultsContainer.innerHTML = `<p class="text-gray-500 text-center mt-8">${translations[lang].initialGraftingMessage}</p>`;
                 displayAlerts();
             }
             allElements.langSwitcher.addEventListener('click', () => {
@@ -660,11 +717,13 @@
                     if(alertsView) alertsView.classList.add('hidden');
                     const weedsView = document.getElementById('view-weeds');
                     if(weedsView) weedsView.classList.add('hidden');
+                    const graftingView = document.getElementById('view-grafting');
+                    if(graftingView) graftingView.classList.add('hidden');
                     return;
                 }
                 
-                const views = { diagnosis: allElements.viewDiagnosis, calendar: document.getElementById('view-calendar'), library: document.getElementById('view-library'), irrigation: document.getElementById('view-irrigation'), alerts: document.getElementById('view-alerts'), weeds: document.getElementById('view-weeds') };
-                const navs = { diagnosis: allElements.navDiagnosis, calendar: allElements.navCalendar, library: allElements.navLibrary, irrigation: allElements.navIrrigation, alerts: allElements.navAlerts, weeds: allElements.navWeeds };
+                const views = { diagnosis: allElements.viewDiagnosis, calendar: document.getElementById('view-calendar'), library: document.getElementById('view-library'), irrigation: document.getElementById('view-irrigation'), alerts: document.getElementById('view-alerts'), weeds: document.getElementById('view-weeds'), grafting: document.getElementById('view-grafting') };
+                const navs = { diagnosis: allElements.navDiagnosis, calendar: allElements.navCalendar, library: allElements.navLibrary, irrigation: allElements.navIrrigation, alerts: allElements.navAlerts, weeds: allElements.navWeeds, grafting: allElements.navGrafting };
                 
                 allElements.viewPremiumLocked.classList.add('hidden');
                 for (const key in views) {
@@ -684,6 +743,7 @@
             allElements.navIrrigation.addEventListener('click', () => switchView('irrigation'));
             allElements.navAlerts.addEventListener('click', () => switchView('alerts'));
             allElements.navWeeds.addEventListener('click', () => switchView('weeds'));
+            allElements.navGrafting.addEventListener('click', () => switchView('grafting'));
 
             async function callGemini(payload, cacheKey = null) { /* ... */ }
             function formatResponse(markdownText) { /* ... */ }
@@ -693,64 +753,17 @@
             let currentUtterance = null;
             function speakText(text, button) { /* ... */ }
 
-            allElements.galleryBtn.addEventListener('click', () => {
-                currentAnalysisType = 'plant_soil';
-                allElements.fileUpload.removeAttribute('capture');
-                allElements.fileUpload.click();
-            });
-            allElements.cameraBtn.addEventListener('click', () => {
-                currentAnalysisType = 'plant_soil';
-                allElements.fileUpload.setAttribute('capture', 'environment');
-                allElements.fileUpload.click();
-            });
-            allElements.galleryWeedsBtn.addEventListener('click', () => {
-                currentAnalysisType = 'weed';
-                allElements.fileUpload.removeAttribute('capture');
-                allElements.fileUpload.click();
-            });
-            allElements.cameraWeedsBtn.addEventListener('click', () => {
-                currentAnalysisType = 'weed';
-                allElements.fileUpload.setAttribute('capture', 'environment');
-                allElements.fileUpload.click();
-            });
-            allElements.fileUpload.addEventListener('change', (event) => {
-                const file = event.target.files[0];
-                if (!file) return;
-                
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    if (currentAnalysisType === 'plant_soil') {
-                        switchView('diagnosis');
-                        analyzeImage(e.target.result);
-                    } else if (currentAnalysisType === 'weed') {
-                        switchView('weeds');
-                        analyzeWeed(e.target.result);
-                    }
-                };
-                reader.readAsDataURL(file);
-                event.target.value = '';
-            });
+            allElements.galleryBtn.addEventListener('click', () => { /* ... */ });
+            allElements.cameraBtn.addEventListener('click', () => { /* ... */ });
+            allElements.galleryWeedsBtn.addEventListener('click', () => { /* ... */ });
+            allElements.cameraWeedsBtn.addEventListener('click', () => { /* ... */ });
+            allElements.fileUpload.addEventListener('change', (event) => { /* ... */ });
 
-            function initializeChat() {
-                const lang = currentLanguage;
-                allElements.chatMessages.innerHTML = `
-                    <div class="m-auto text-center">
-                        <p class="text-gray-500" data-translate="initialChatMessage">${translations[lang].initialChatMessage}</p>
-                        <div class="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg text-sm">
-                            <p class="font-semibold text-green-800" data-translate="tipOfTheDay">${translations[lang].tipOfTheDay}</p>
-                            <p class="text-green-700" id="tip-of-the-day-chat">${translations[lang].loading}</p>
-                        </div>
-                    </div>`;
-                fetchTipOfTheDay();
-            }
-
+            function initializeChat() { /* ... */ }
             async function analyzeImage(base64ImageData) { /* ... */ }
-
             allElements.chatForm.addEventListener('submit', async (e) => { /* ... */ });
-
             function appendChatMessage(text, sender) { /* ... */ }
 
-            // --- LÓGICA DEL CALENDARIO, BIBLIOTECA, RIEGO, MALEZAS, ALERTAS ---
             allElements.generateCalendarBtn.addEventListener('click', async () => { /* ... */ });
             allElements.librarySearchBtn.addEventListener('click', searchLibrary);
             allElements.librarySearchInput.addEventListener('keyup', (event) => { if (event.key === 'Enter') searchLibrary(); });
@@ -760,8 +773,35 @@
             function generateAlerts() { /* ... */ }
             function updateAlertBadge() { /* ... */ }
             function displayAlerts() { /* ... */ }
+            
+            // --- LÓGICA DE INJERTOS ---
+            const fruitTrees = ["Mango", "Aguacate", "Naranja", "Limón", "Mandarina", "Zapote", "Níspero", "Guanábana"];
+            fruitTrees.forEach(fruit => {
+                allElements.rootstockSelect.innerHTML += `<option>${fruit}</option>`;
+                allElements.scionSelect.innerHTML += `<option>${fruit}</option>`;
+            });
 
-            // --- FUNCIONES AUXILIARES Y DE INICIALIZACIÓN ---
+            allElements.generateGraftGuideBtn.addEventListener('click', async () => {
+                const canGraft = await checkUsageLimit('graft');
+                if (!canGraft) return;
+
+                const rootstock = allElements.rootstockSelect.value;
+                const scion = allElements.scionSelect.value;
+                showLoader(allElements.graftingResultsContainer, "Generando guía...");
+
+                const langInstruction = `Respond in ${currentLanguage === 'es' ? 'Spanish' : 'English'}.`;
+                const graftPrompt = `Act as a grafting expert. Can a **${scion}** scion be grafted onto a **${rootstock}** rootstock? 
+                IF COMPATIBLE: First, confirm they are compatible. Then, provide a detailed, step-by-step guide for a T-budding or cleft graft, including tools needed, best time of year, and post-grafting care.
+                IF NOT COMPATIBLE: Explain clearly why they are not compatible (e.g., different plant families).
+                ${langInstruction}`;
+
+                const payload = { contents: [{ role: "user", parts: [{ text: graftPrompt }] }] };
+                const graftText = await callGemini(payload);
+                await incrementUsage('graft');
+                allElements.graftingResultsContainer.innerHTML = formatResponse(graftText);
+            });
+
+
             async function fetchWeather(lat, lon) { /* ... */ }
             function initializeWeather() { /* ... */ }
             async function fetchTipOfTheDay() { /* ... */ }
@@ -769,7 +809,6 @@
             window.addEventListener('online', updateOnlineStatus);
             window.addEventListener('offline', updateOnlineStatus);
 
-            // --- INICIALIZACIÓN FINAL ---
             const savedLang = localStorage.getItem('agroia-lang') || 'es';
             setLanguage(savedLang);
             updateOnlineStatus();
