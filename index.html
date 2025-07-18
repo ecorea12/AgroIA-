@@ -667,13 +667,9 @@
                 document.documentElement.lang = lang;
                 
                 if (lang === 'es') {
-                    allElements.langFlag.src = 'https://flagcdn.com/us.svg';
-                    allElements.langFlag.alt = 'Switch to English';
-                    allElements.langSwitcher.title = 'Switch to English';
+                    allElements.langSwitcher.textContent = 'EN';
                 } else {
-                    allElements.langFlag.src = 'https://flagcdn.com/es.svg';
-                    allElements.langFlag.alt = 'Cambiar a Español';
-                    allElements.langSwitcher.title = 'Cambiar a Español';
+                    allElements.langSwitcher.textContent = 'ES';
                 }
 
                 document.querySelectorAll('[data-translate]').forEach(el => {
